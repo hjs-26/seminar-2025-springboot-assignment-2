@@ -1,0 +1,2 @@
+GET http://localhost:8080/api/v1/courses/fetch?trace=true
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTc2MTgyMDQ2MiwiZXhwIjoxNzYxOTA2ODYyfQ._IodhHBoEccSmLlG_RjYq-ri_72GnsOF86c77M-I8cE
