@@ -21,5 +21,5 @@ data class Course(
     var courseTitle: String,
     var credit: Long,
     var instructor: String?,
-    var classTimeJson: List<ClassPlaceAndTime>?
+    var classTimeJson: List<ClassPlaceAndTime>?,
 )

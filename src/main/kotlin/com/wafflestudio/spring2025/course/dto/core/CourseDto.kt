@@ -20,7 +20,7 @@ data class CourseDto(
     var instructor: String?,
     var classTimeJson: List<ClassPlaceAndTime>?,
 ) {
-    constructor(course: Course): this(
+    constructor(course: Course) : this(
         id = course.id!!,
         year = course.year,
         semester = course.semester,

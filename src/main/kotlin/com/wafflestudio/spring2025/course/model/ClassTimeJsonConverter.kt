@@ -11,19 +11,15 @@ import org.springframework.stereotype.Component
 @ReadingConverter
 @Component
 class ClassTimeJsonReadConverter(
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
 ) : Converter<String, List<ClassPlaceAndTime>> {
-    override fun convert(source: String): List<ClassPlaceAndTime> {
-        return objectMapper.readValue(source)
-    }
+    override fun convert(source: String): List<ClassPlaceAndTime> = objectMapper.readValue(source)
 }
 
 @WritingConverter
 @Component
 class ClassTimeJsonWriteConverter(
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
 ) : Converter<List<ClassPlaceAndTime>, String> {
-    override fun convert(source: List<ClassPlaceAndTime>): String {
-        return objectMapper.writeValueAsString(source)
-    }
+    override fun convert(source: List<ClassPlaceAndTime>): String = objectMapper.writeValueAsString(source)
 }

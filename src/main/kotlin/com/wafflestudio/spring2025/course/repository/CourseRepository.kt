@@ -1,14 +1,10 @@
 package com.wafflestudio.spring2025.course.repository
 
 import com.wafflestudio.spring2025.common.enum.Semester
-import com.wafflestudio.spring2025.course.dto.core.CourseDto
 import com.wafflestudio.spring2025.course.model.Course
-import com.wafflestudio.spring2025.post.model.Post
-import com.wafflestudio.spring2025.post.model.PostWithUserAndBoard
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
-import java.time.Instant
 
 interface CourseRepository : CrudRepository<Course, Long> {
     @Query(
@@ -26,7 +22,7 @@ interface CourseRepository : CrudRepository<Course, Long> {
         ORDER BY c.id DESC
         LIMIT :limit
     
-    """
+    """,
     )
     fun search(
         @Param("year") year: Int,

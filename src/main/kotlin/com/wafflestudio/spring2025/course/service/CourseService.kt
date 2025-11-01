@@ -18,19 +18,19 @@ class CourseService(
         nextId: Long?,
         limit: Int,
     ): CourseSearchResponse {
-
         if (year != 2025 || semester != Semester.SUMMER) {
             throw IllegalPeriodException()
         }
         val queryLimit = limit + 1
 
-        val courses = courseRepository.search(
-            year = year,
-            semester = semester,
-            keyword = keyword,
-            nextId = nextId,
-            limit = queryLimit,
-        )
+        val courses =
+            courseRepository.search(
+                year = year,
+                semester = semester,
+                keyword = keyword,
+                nextId = nextId,
+                limit = queryLimit,
+            )
 
         val hasNext = courses.size > limit
         val coursesToReturn = if (hasNext) courses.take(limit) else courses
@@ -42,5 +42,4 @@ class CourseService(
             hasNext = hasNext,
         )
     }
-
 }

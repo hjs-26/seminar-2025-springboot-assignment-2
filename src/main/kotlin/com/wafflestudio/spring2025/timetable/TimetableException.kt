@@ -11,10 +11,38 @@ sealed class TimetableException(
     cause: Throwable? = null,
 ) : DomainException(errorCode, httpStatusCode, msg, cause)
 
-class BoardNotFoundException :
+class TimetableNameBlankException :
+    TimetableException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.BAD_REQUEST,
+        msg = "Timetable name must not be blank",
+    )
+
+class TimetableInvalidYearException(
+    currentYear: Int,
+) : TimetableException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.BAD_REQUEST,
+        msg = "Year must be between 2013 and $currentYear",
+    )
+
+class TimetableDuplicateException :
+    TimetableException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.CONFLICT,
+        msg = "Timetable with the same name already exists for this semester",
+    )
+
+class TimetableNotFoundException :
     TimetableException(
         errorCode = 0,
         httpStatusCode = HttpStatus.NOT_FOUND,
-        msg = "Board not found",
+        msg = "Timetable not found",
     )
 
+class TimetableModifyForbiddenException :
+    TimetableException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.FORBIDDEN,
+        msg = "You don't have permission to modify this timetable",
+    )
