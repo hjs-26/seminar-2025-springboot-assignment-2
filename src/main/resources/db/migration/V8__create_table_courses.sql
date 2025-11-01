@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS courses
     course_title VARCHAR(255) NOT NULL,         -- 교과목명 (model: courseTitle)
     credit BIGINT NOT NULL,                     -- 학점 수 (model: credit)
     instructor VARCHAR(100),                    -- 담당교수 (model: instructor)
-    category VARCHAR(100),                      -- 카테고리 (model: category)
 
     -- 수업 시간 및 강의실 정보 (JSON 형식으로 저장)
     -- (model: classPlaceAndTimes)
