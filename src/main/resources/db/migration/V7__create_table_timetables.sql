@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS timetables
     CONSTRAINT timetables__fk__user_id
     FOREIGN KEY (user_id) REFERENCES users (id),
 
-    UNIQUE KEY uq__user_id__year__semester__name (user_id, year, semester, name),
+    UNIQUE KEY uq__user_id__year__semester__name (user_id, year, semester, name)
     );
 
-CREATE INDEX idx_user_id (user_id)
+CREATE INDEX idx_timetables_1 ON timetables (user_id);
