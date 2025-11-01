@@ -33,7 +33,7 @@ class TimetableService(
             throw TimetableDuplicateException()
         }
 
-        // Create
+        // Create new timetable
         val timetable = timetableRepository.save(
             Timetable(
                 userId = user.id!!,
@@ -44,6 +44,14 @@ class TimetableService(
         )
 
         return TimetableDto(timetable)
+    }
+
+    fun getAll(
+        user: User
+    ): List<TimetableDto> {
+        // Get all timetable of logged-in user
+        val timetable = timetableRepository.findByUserId(user.id!!)
+        return timetable.map { TimetableDto(it) }
     }
 
 }

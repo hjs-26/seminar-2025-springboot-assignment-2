@@ -1,7 +1,7 @@
 package com.wafflestudio.spring2025.timetable.controller
 
 import com.wafflestudio.spring2025.timetable.dto.request.CreateTimetableRequest
-import com.wafflestudio.spring2025.timetable.dto.response.CreateTimetableResponse
+import com.wafflestudio.spring2025.timetable.dto.response.TimetableResponse
 import com.wafflestudio.spring2025.timetable.service.TimetableService
 import com.wafflestudio.spring2025.user.LoggedInUser
 import com.wafflestudio.spring2025.user.model.User
@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -35,7 +36,7 @@ class TimetableController(
     fun create(
         @Parameter(hidden = true) @LoggedInUser user: User,
         @RequestBody createRequest: CreateTimetableRequest,
-    ): ResponseEntity<CreateTimetableResponse> {
+    ): ResponseEntity<TimetableResponse> {
         val timetableDto =
             timetableService.create(
                 user = user,
@@ -44,6 +45,23 @@ class TimetableController(
                 year = createRequest.year,
             )
         return ResponseEntity.status(HttpStatus.CREATED).body(timetableDto)
+    }
+
+    @Operation(summary = "시간표 전체 조회", description = "유저가 생성한 모든 시간표를 조회합니다")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "시간표 전체 조회 성공")
+        ]
+    )
+    @GetMapping("/timetables")
+    fun getAll(
+        @Parameter(hidden = true) @LoggedInUser user: User,
+    ): ResponseEntity<List<TimetableResponse>> {
+        val timetableDtoList =
+        timetableService.getAll(
+            user = user,
+        )
+        return ResponseEntity.ok(timetableDtoList)
     }
 
 }
