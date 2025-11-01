@@ -18,7 +18,10 @@ class CourseService(
         nextId: Long?,
         limit: Int,
     ): CourseSearchResponse {
-        validSearchPeriod(year, semester)
+
+        if (year != 2025 || semester != Semester.SUMMER) {
+            throw IllegalPeriodException()
+        }
         val queryLimit = limit + 1
 
         val courses = courseRepository.search(
@@ -40,10 +43,4 @@ class CourseService(
         )
     }
 
-}
-
-fun validSearchPeriod(year: Int, semester: Semester) {
-    if (year != 2025 || semester != Semester.SUMMER) {
-        throw IllegalPeriodException()
-    }
 }
