@@ -34,19 +34,20 @@ class TimetableIntegrationTest
         fun `should create a timetable`() {
             // 시간표를 생성할 수 있다
             val (user, token) = dataGenerator.generateUser()
-            val request = mapOf(
-                "name" to "2025-2 시간표",
-                "year" to 2025,
-                "semester" to "FALL"
-            )
+            val request =
+                mapOf(
+                    "name" to "2025-2 시간표",
+                    "year" to 2025,
+                    "semester" to "FALL",
+                )
 
-            mvc.perform(
-                post("/api/v1/timetables")
-                    .header("Authorization", "Bearer $token")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(request))
-            )
-                .andExpect(status().isCreated)
+            mvc
+                .perform(
+                    post("/api/v1/timetables")
+                        .header("Authorization", "Bearer $token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request)),
+                ).andExpect(status().isCreated)
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name").value("2025-2 시간표"))
                 .andExpect(jsonPath("$.year").value(2025))
@@ -60,11 +61,11 @@ class TimetableIntegrationTest
             dataGenerator.generateTimetable(name = "2025-1 시간표", year = 2025, semester = Semester.SPRING, user = user)
             dataGenerator.generateTimetable(name = "2025-2 시간표", year = 2025, semester = Semester.FALL, user = user)
 
-            mvc.perform(
-                get("/api/v1/timetables")
-                    .header("Authorization", "Bearer $token")
-            )
-                .andExpect(status().isOk)
+            mvc
+                .perform(
+                    get("/api/v1/timetables")
+                        .header("Authorization", "Bearer $token"),
+                ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].name").exists())
                 .andExpect(jsonPath("$[1].name").exists())
@@ -76,11 +77,11 @@ class TimetableIntegrationTest
             val (user, token) = dataGenerator.generateUser()
             val timetable = dataGenerator.generateTimetable(name = "2025-2 시간표", user = user)
 
-            mvc.perform(
-                get("/api/v1/timetables/${timetable.id}")
-                    .header("Authorization", "Bearer $token")
-            )
-                .andExpect(status().isOk)
+            mvc
+                .perform(
+                    get("/api/v1/timetables/${timetable.id}")
+                        .header("Authorization", "Bearer $token"),
+                ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.id").value(timetable.id!!))
                 .andExpect(jsonPath("$.name").value("2025-2 시간표"))
                 .andExpect(jsonPath("$.courses").isArray)
@@ -94,13 +95,13 @@ class TimetableIntegrationTest
             val timetable = dataGenerator.generateTimetable(name = "기존 시간표", user = user)
             val request = mapOf("name" to "새로운 시간표")
 
-            mvc.perform(
-                patch("/api/v1/timetables/${timetable.id}")
-                    .header("Authorization", "Bearer $token")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(request))
-            )
-                .andExpect(status().isOk)
+            mvc
+                .perform(
+                    patch("/api/v1/timetables/${timetable.id}")
+                        .header("Authorization", "Bearer $token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request)),
+                ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.id").value(timetable.id!!))
                 .andExpect(jsonPath("$.name").value("새로운 시간표"))
         }
@@ -113,13 +114,13 @@ class TimetableIntegrationTest
             val timetable = dataGenerator.generateTimetable(name = "user1 시간표", user = user1)
             val request = mapOf("name" to "해킹 시도")
 
-            mvc.perform(
-                patch("/api/v1/timetables/${timetable.id}")
-                    .header("Authorization", "Bearer $token2")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(request))
-            )
-                .andExpect(status().isForbidden)
+            mvc
+                .perform(
+                    patch("/api/v1/timetables/${timetable.id}")
+                        .header("Authorization", "Bearer $token2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request)),
+                ).andExpect(status().isForbidden)
         }
 
         @Test
@@ -128,11 +129,11 @@ class TimetableIntegrationTest
             val (user, token) = dataGenerator.generateUser()
             val timetable = dataGenerator.generateTimetable(name = "삭제할 시간표", user = user)
 
-            mvc.perform(
-                delete("/api/v1/timetables/${timetable.id}")
-                    .header("Authorization", "Bearer $token")
-            )
-                .andExpect(status().isNoContent)
+            mvc
+                .perform(
+                    delete("/api/v1/timetables/${timetable.id}")
+                        .header("Authorization", "Bearer $token"),
+                ).andExpect(status().isNoContent)
         }
 
         @Test
@@ -142,11 +143,11 @@ class TimetableIntegrationTest
             val (user2, token2) = dataGenerator.generateUser()
             val timetable = dataGenerator.generateTimetable(name = "user1 시간표", user = user1)
 
-            mvc.perform(
-                delete("/api/v1/timetables/${timetable.id}")
-                    .header("Authorization", "Bearer $token2")
-            )
-                .andExpect(status().isForbidden)
+            mvc
+                .perform(
+                    delete("/api/v1/timetables/${timetable.id}")
+                        .header("Authorization", "Bearer $token2"),
+                ).andExpect(status().isForbidden)
         }
 
         @Test

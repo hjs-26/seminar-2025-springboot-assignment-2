@@ -6,5 +6,11 @@ import org.springframework.data.repository.ListCrudRepository
 
 interface TimetableRepository : ListCrudRepository<Timetable, Long> {
     fun findByUserId(userId: Long): List<Timetable>
-    fun existsByUserIdAndYearAndSemesterAndName(userId: Long, year: Int, semester: Semester, name: String): Boolean
+
+    fun existsByUserIdAndYearAndSemesterAndName(
+        userId: Long,
+        year: Int,
+        semester: Semester,
+        name: String,
+    ): Boolean
 }

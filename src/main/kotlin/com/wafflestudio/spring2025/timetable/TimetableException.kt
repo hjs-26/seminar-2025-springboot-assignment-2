@@ -18,8 +18,9 @@ class TimetableNameBlankException :
         msg = "Timetable name must not be blank",
     )
 
-class TimetableInvalidYearException(currentYear: Int) :
-    TimetableException(
+class TimetableInvalidYearException(
+    currentYear: Int,
+) : TimetableException(
         errorCode = 0,
         httpStatusCode = HttpStatus.BAD_REQUEST,
         msg = "Year must be between 2013 and $currentYear",
@@ -45,4 +46,3 @@ class TimetableModifyForbiddenException :
         httpStatusCode = HttpStatus.FORBIDDEN,
         msg = "You don't have permission to modify this timetable",
     )
-

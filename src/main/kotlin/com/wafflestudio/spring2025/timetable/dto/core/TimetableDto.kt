@@ -8,13 +8,10 @@ import io.swagger.v3.oas.annotations.media.Schema
 data class TimetableDto(
     @Schema(description = "시간표 ID", example = "1")
     val id: Long,
-
     @Schema(description = "시간표 이름", example = "2025-2 시간표")
     val name: String,
-
     @Schema(description = "연도", example = "2025")
     val year: Int,
-
     @Schema(description = "학기", example = "FALL")
     val semester: Semester,
 ) {

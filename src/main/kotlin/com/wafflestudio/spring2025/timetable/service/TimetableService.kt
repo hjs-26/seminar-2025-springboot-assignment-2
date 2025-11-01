@@ -16,7 +16,7 @@ import kotlin.jvm.optionals.getOrNull
 
 @Service
 class TimetableService(
-    private val timetableRepository: TimetableRepository
+    private val timetableRepository: TimetableRepository,
 ) {
     fun create(
         user: User,
@@ -37,21 +37,20 @@ class TimetableService(
         }
 
         // Create new timetable
-        val timetable = timetableRepository.save(
-            Timetable(
-                userId = user.id!!,
-                name = name,
-                year = year,
-                semester = semester,
+        val timetable =
+            timetableRepository.save(
+                Timetable(
+                    userId = user.id!!,
+                    name = name,
+                    year = year,
+                    semester = semester,
+                ),
             )
-        )
 
         return TimetableDto(timetable)
     }
 
-    fun getAll(
-        user: User
-    ): List<TimetableDto> {
+    fun getAll(user: User): List<TimetableDto> {
         // Get all timetable of logged-in user
         val timetable = timetableRepository.findByUserId(user.id!!)
         return timetable.map { TimetableDto(it) }
@@ -63,25 +62,30 @@ class TimetableService(
         name: String,
     ): TimetableDto {
         // Exceptions
-        val timetable = timetableRepository.findById(timetableId).getOrNull()
-            ?: throw TimetableNotFoundException()
+        val timetable =
+            timetableRepository.findById(timetableId).getOrNull()
+                ?: throw TimetableNotFoundException()
         if (user.id != timetable.userId) {
             throw TimetableModifyForbiddenException()
         }
         if (name.isBlank()) {
             throw TimetableNameBlankException()
         }
+        if (timetableRepository.existsByUserIdAndYearAndSemesterAndName(user.id!!, timetable.year, timetable.semester, name)) {
+            throw TimetableDuplicateException()
+        }
 
         // Update timetable name
-        val newTimetable = timetableRepository.save(
-            Timetable(
-                id = timetableId,
-                userId = user.id!!,
-                name = name,
-                year = timetable.year,
-                semester = timetable.semester,
+        val newTimetable =
+            timetableRepository.save(
+                Timetable(
+                    id = timetableId,
+                    userId = user.id!!,
+                    name = name,
+                    year = timetable.year,
+                    semester = timetable.semester,
+                ),
             )
-        )
 
         return TimetableDto(newTimetable)
     }
@@ -91,8 +95,9 @@ class TimetableService(
         timetableId: Long,
     ) {
         // Exceptions
-        val timetable = timetableRepository.findById(timetableId).getOrNull()
-            ?: throw TimetableNotFoundException()
+        val timetable =
+            timetableRepository.findById(timetableId).getOrNull()
+                ?: throw TimetableNotFoundException()
         if (user.id != timetable.userId) {
             throw TimetableModifyForbiddenException()
         }
@@ -100,5 +105,4 @@ class TimetableService(
         // Delete timetable
         timetableRepository.delete(timetable)
     }
-
 }

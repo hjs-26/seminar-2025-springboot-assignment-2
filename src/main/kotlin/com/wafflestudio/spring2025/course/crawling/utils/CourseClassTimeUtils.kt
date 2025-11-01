@@ -1,8 +1,8 @@
 package com.wafflestudio.spring2025.course.crawling.utils
 
-import com.wafflestudio.spring2025.course.crawling.DayOfWeek
 import com.wafflestudio.spring2025.course.crawling.ClassPlaceAndTime
 import com.wafflestudio.spring2025.course.crawling.CourseClassTime
+import com.wafflestudio.spring2025.course.crawling.DayOfWeek
 import org.slf4j.LoggerFactory
 import kotlin.text.get
 
@@ -16,28 +16,28 @@ object CourseClassTimeUtils {
         locationsTexts: List<String>,
     ): List<ClassPlaceAndTime> =
         runCatching {
-            val CourseClassTimes =
+            val courseClassTimes =
                 classTimesTexts
                     .filter { it.isNotBlank() }
                     .map(CourseClassTimeUtils::parseCourseClassTime)
             val locationTexts =
                 locationsTexts.let { locationText ->
                     when (locationText.size) {
-                        CourseClassTimes.size -> locationText
-                        1 -> List(CourseClassTimes.size) { locationText.first() }
-                        0 -> List(CourseClassTimes.size) { "" }
+                        courseClassTimes.size -> locationText
+                        1 -> List(courseClassTimes.size) { locationText.first() }
+                        0 -> List(courseClassTimes.size) { "" }
                         else -> throw RuntimeException("locations does not match with times $classTimesTexts $locationsTexts")
                     }
                 }
-            CourseClassTimes
+            courseClassTimes
                 .zip(locationTexts)
                 .groupBy({ it.first }, { it.second })
-                .map { (CourseClassTime, locationTexts) ->
+                .map { (courseClassTime, locationTexts) ->
                     ClassPlaceAndTime(
-                        day = DayOfWeek.getByKoreanText(CourseClassTime.dayOfWeek)!!,
+                        day = DayOfWeek.getByKoreanText(courseClassTime.dayOfWeek)!!,
                         place = locationTexts.joinToString("/"),
-                        startMinute = CourseClassTime.startHour.toInt() * 60 + CourseClassTime.startMinute.toInt(),
-                        endMinute = CourseClassTime.endHour.toInt() * 60 + CourseClassTime.endMinute.toInt(),
+                        startMinute = courseClassTime.startHour.toInt() * 60 + courseClassTime.startMinute.toInt(),
+                        endMinute = courseClassTime.endHour.toInt() * 60 + courseClassTime.endMinute.toInt(),
                     )
                 }.sortedWith(compareBy({ it.day.value }, { it.startMinute }))
         }.getOrElse {

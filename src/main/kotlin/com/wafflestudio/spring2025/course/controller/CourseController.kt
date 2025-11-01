@@ -1,7 +1,7 @@
 package com.wafflestudio.spring2025.course.controller
 
-import com.wafflestudio.spring2025.course.dto.CreateCourseResponse
 import com.wafflestudio.spring2025.course.dto.CreateCourseRequest
+import com.wafflestudio.spring2025.course.dto.CreateCourseResponse
 import com.wafflestudio.spring2025.course.service.CourseService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping

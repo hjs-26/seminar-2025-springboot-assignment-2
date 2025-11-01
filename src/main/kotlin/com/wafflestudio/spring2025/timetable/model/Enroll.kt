@@ -11,5 +11,5 @@ data class Enroll(
     var timetableId: Long,
     var courseId: Long,
     @CreatedDate
-    var createdAt: Instant? = null
+    var createdAt: Instant? = null,
 )

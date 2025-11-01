@@ -35,14 +35,13 @@ class DatabaseConfig(
             .build()
 
     @Bean
-    override fun jdbcCustomConversions(): JdbcCustomConversions {
-        return JdbcCustomConversions(
+    override fun jdbcCustomConversions(): JdbcCustomConversions =
+        JdbcCustomConversions(
             listOf(
                 semesterReadConverter,
                 semesterWriteConverter,
                 classTimeJsonReadConverter,
-                classTimeJsonWriteConverter
-            )
+                classTimeJsonWriteConverter,
+            ),
         )
-    }
 }

@@ -34,8 +34,8 @@ class TimetableController(
         value = [
             ApiResponse(responseCode = "201", description = "시간표 생성 성공"),
             ApiResponse(responseCode = "400", description = "잘못된 요청 (빈 이름 또는 잘못된 연도)"),
-            ApiResponse(responseCode = "409", description = "중복된 시간표")
-        ]
+            ApiResponse(responseCode = "409", description = "중복된 시간표"),
+        ],
     )
     @PostMapping("/timetables")
     fun create(
@@ -55,17 +55,17 @@ class TimetableController(
     @Operation(summary = "시간표 전체 조회", description = "유저가 생성한 모든 시간표를 조회합니다")
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "시간표 전체 조회 성공")
-        ]
+            ApiResponse(responseCode = "200", description = "시간표 전체 조회 성공"),
+        ],
     )
     @GetMapping("/timetables")
     fun getAll(
         @Parameter(hidden = true) @LoggedInUser user: User,
     ): ResponseEntity<TimetableListResponse> {
         val timetableDtoList =
-        timetableService.getAll(
-            user = user,
-        )
+            timetableService.getAll(
+                user = user,
+            )
         return ResponseEntity.ok(timetableDtoList)
     }
 
@@ -75,8 +75,9 @@ class TimetableController(
             ApiResponse(responseCode = "200", description = "시간표 이름 변경 성공"),
             ApiResponse(responseCode = "400", description = "잘못된 요청 (빈 이름)"),
             ApiResponse(responseCode = "403", description = "다른 유저의 시간표의 이름을 변경 시도"),
-            ApiResponse(responseCode = "404", description = "시간표를 찾지 못함")
-        ]
+            ApiResponse(responseCode = "404", description = "시간표를 찾지 못함"),
+            ApiResponse(responseCode = "409", description = "중복된 시간표"),
+        ],
     )
     @PatchMapping("/timetables/{timetableId}")
     fun update(
@@ -98,8 +99,8 @@ class TimetableController(
         value = [
             ApiResponse(responseCode = "204", description = "시간표 삭제 성공"),
             ApiResponse(responseCode = "403", description = "다른 유저의 시간표를 삭제 시도"),
-            ApiResponse(responseCode = "404", description = "시간표를 찾지 못함")
-        ]
+            ApiResponse(responseCode = "404", description = "시간표를 찾지 못함"),
+        ],
     )
     @DeleteMapping("/timetables/{timetableId}")
     fun delete(
@@ -112,5 +113,4 @@ class TimetableController(
         )
         return ResponseEntity.noContent().build()
     }
-
 }

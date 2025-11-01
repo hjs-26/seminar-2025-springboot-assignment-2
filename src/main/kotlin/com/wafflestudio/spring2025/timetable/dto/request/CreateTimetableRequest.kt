@@ -7,10 +7,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 data class CreateTimetableRequest(
     @Schema(description = "시간표 이름", example = "2025-2 시간표", required = true)
     val name: String,
-
     @Schema(description = "연도", example = "2025", required = true)
     val year: Int,
-
     @Schema(description = "학기 (SPRING, SUMMER, FALL, WINTER)", example = "FALL", required = true)
     var semester: Semester,
 )
