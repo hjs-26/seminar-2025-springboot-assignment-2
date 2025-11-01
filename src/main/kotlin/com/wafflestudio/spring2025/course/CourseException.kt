@@ -35,6 +35,6 @@ class CourseNameConflictException :
 class IllegalPeriodException :
     CourseException(
         errorCode = 0,
-        httpStatusCode = HttpStatus.NOT_FOUND,
+        httpStatusCode = HttpStatus.BAD_REQUEST,
         msg = "Search for Illegal period",
     )
