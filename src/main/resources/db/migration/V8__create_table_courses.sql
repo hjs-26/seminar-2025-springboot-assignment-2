@@ -27,6 +27,6 @@ CREATE TABLE IF NOT EXISTS courses
 );
 
 -- 강의 검색을 위한 인덱스
-CREATE INDEX idx_year_semester (year, semester),
-CREATE INDEX idx_course_title (course_title),
-CREATE INDEX idx_instructor (instructor)
+CREATE INDEX idx_courses_1 ON courses (year, semester);
+CREATE INDEX idx_courses_2 ON courses (course_title);
+CREATE INDEX idx_courses_3 ON courses (instructor)
