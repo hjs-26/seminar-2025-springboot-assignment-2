@@ -24,10 +24,10 @@ CREATE TABLE IF NOT EXISTS courses
     class_time_json JSON,
 
     -- 특정 학년도의 강의는 교과목번호와 강좌번호로 유일하게 식별됩니다.
-    UNIQUE KEY uq__year__semester__course_number__lecture_number (year, semester, course_number, lecture_number),
-
-    -- 강의 검색을 위한 인덱스
-    INDEX idx_year_semester (year, semester),
-    INDEX idx_course_title (course_title),
-    INDEX idx_instructor (instructor)
+    UNIQUE KEY uq__year__semester__course_number__lecture_number (year, semester, course_number, lecture_number)
 );
+
+-- 강의 검색을 위한 인덱스
+CREATE INDEX idx_year_semester (year, semester),
+CREATE INDEX idx_course_title (course_title),
+CREATE INDEX idx_instructor (instructor)
