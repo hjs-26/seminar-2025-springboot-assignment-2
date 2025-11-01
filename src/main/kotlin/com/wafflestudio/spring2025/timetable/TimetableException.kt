@@ -39,4 +39,10 @@ class TimetableNotFoundException :
         msg = "Timetable not found",
     )
 
+class TimetableModifyForbiddenException :
+    TimetableException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.FORBIDDEN,
+        msg = "You don't have permission to modify this timetable",
+    )
 
