@@ -10,22 +10,5 @@ import org.springframework.stereotype.Service
 @Service
 class CourseService(
     private val courseRepository: CourseRepository,
-) {
-    fun create(name: String): CourseDto {
-        if (name.isBlank()) {
-            throw BoardNameBlankException()
-        }
-        if (courseRepository.existsByName(name)) {
-            throw BoardNameConflictException()
-        }
-        val course =
-            courseRepository.save(
-                Course(
-                    name = name,
-                ),
-            )
-        return CourseDto(course)
-    }
+)
 
-    fun list(): List<CourseDto> = courseRepository.findAll().map { CourseDto(it) }
-}
