@@ -13,19 +13,21 @@ data class Course(
     @Id
     @JsonProperty("_id")
     var id: String? = null,
+    var classification: String,
+    var college: String,
+    var department: String?,
+    @Field("course")
+    var academicCourse: String?,
     @Field("academic_year")
     var academicYear: String?,
-    var category: String?,
-    @Field("class_time_json")
-    var classPlaceAndTimes: List<ClassPlaceAndTime>,
-    var classification: String?,
-    var credit: Long,
-    var department: String?,
-    var instructor: String?,
-    @Field("lecture_number")
-    var lectureNumber: String,
     @Field("course_number")
     var courseNumber: String,
+    @Field("lecture_number")
+    var lectureNumber: String,
     @Field("course_title")
     var courseTitle: String,
+    var credit: Long,
+    @Field("class_time_json")
+    var classPlaceAndTimes: List<ClassPlaceAndTime>,
+    var instructor: String?,
 )

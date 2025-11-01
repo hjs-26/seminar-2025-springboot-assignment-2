@@ -34,6 +34,7 @@ class CourseFetchServiceImpl(
                 convertCourseRowToLecture(row, columnNameIndex)
             }.also {
                 koreanLectureXlsx.release()
+                englishLectureXlsx.release()
             }.map { lecture ->
                 lecture
             }
@@ -72,14 +73,15 @@ class CourseFetchServiceImpl(
 
         return Course(
             classification = classification,
+            college = college,
             department = department.replace("null", "").ifEmpty { college },
+            academicCourse = academicCourse,
             academicYear = academicCourse.takeIf { academicCourse != "학사" } ?: academicYear,
             courseNumber = courseNumber,
             lectureNumber = lectureNumber,
             courseTitle = courseFullTitle,
             credit = credit,
             instructor = instructor,
-            category = "",
             classPlaceAndTimes = classTimes,
         )
     }
