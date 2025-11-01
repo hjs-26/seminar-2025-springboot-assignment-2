@@ -6,7 +6,7 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
 
 @Table("enrolls")
-data class TimetableCourse(
+data class Enroll(
     @Id var id: Long? = null,
     var timetableId: Long,
     var courseId: Long,

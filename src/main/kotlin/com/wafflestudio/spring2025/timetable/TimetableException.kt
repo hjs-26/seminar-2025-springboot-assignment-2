@@ -11,6 +11,27 @@ sealed class TimetableException(
     cause: Throwable? = null,
 ) : DomainException(errorCode, httpStatusCode, msg, cause)
 
+class TimetableDuplicateException :
+    TimetableException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.CONFLICT,
+        msg = "Timetable with the same name already exists for this semester",
+    )
+
+class TimetableNameBlankException :
+    TimetableException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.BAD_REQUEST,
+        msg = "Timetable name must not be blank",
+    )
+
+class TimetableInvalidYearException(currentYear: Int) :
+    TimetableException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.BAD_REQUEST,
+        msg = "Year must be between 2013 and $currentYear",
+    )
+
 class TimetableNotFoundException :
     TimetableException(
         errorCode = 0,
@@ -20,29 +41,33 @@ class TimetableNotFoundException :
 
 class CourseNotFoundException :
     TimetableException(
-        errorCode = 1,
+        errorCode = 0,
         httpStatusCode = HttpStatus.NOT_FOUND,
         msg = "Course not found",
     )
 
 class TimeConflictException(conflictingCourseTitle: String) :
     TimetableException(
-        errorCode = 2,
+        errorCode = 0,
         httpStatusCode = HttpStatus.CONFLICT,
         msg = "Time conflict with existing course: $conflictingCourseTitle",
     )
 
 class CourseAlreadyAddedException :
     TimetableException(
-        errorCode = 3,
+        errorCode = 0,
         httpStatusCode = HttpStatus.CONFLICT,
         msg = "Course already added to timetable",
     )
 
 class UnauthorizedTimetableAccessException :
     TimetableException(
-        errorCode = 4,
+        errorCode = 0,
         httpStatusCode = HttpStatus.FORBIDDEN,
         msg = "You don't have permission to access this timetable",
     )
+
+
+
+
 

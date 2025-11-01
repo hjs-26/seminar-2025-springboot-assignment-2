@@ -9,14 +9,10 @@ data class TimetableDto(
     val year: Int,
     val semester: Semester,
 ) {
-    companion object {
-        fun from(timetable: Timetable): TimetableDto {
-            return TimetableDto(
-                id = timetable.id!!,
-                name = timetable.name,
-                year = timetable.year,
-                semester = timetable.semester,
-            )
-        }
-    }
+    constructor(timetable: Timetable) : this(
+        id = timetable.id!!,
+        name = timetable.name,
+        year = timetable.year,
+        semester = timetable.semester,
+    )
 }

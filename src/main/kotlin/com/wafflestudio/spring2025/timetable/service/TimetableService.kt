@@ -1,10 +1,49 @@
 package com.wafflestudio.spring2025.timetable.service
 
+import com.wafflestudio.spring2025.common.enum.Semester
+import com.wafflestudio.spring2025.timetable.TimetableDuplicateException
+import com.wafflestudio.spring2025.timetable.TimetableInvalidYearException
+import com.wafflestudio.spring2025.timetable.TimetableNameBlankException
+import com.wafflestudio.spring2025.timetable.dto.core.TimetableDto
+import com.wafflestudio.spring2025.timetable.model.Timetable
+import com.wafflestudio.spring2025.timetable.repository.TimetableRepository
+import com.wafflestudio.spring2025.user.model.User
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class TimetableService(
+    private val timetableRepository: TimetableRepository
 ) {
-    fun create(){}
+    fun create(
+        user: User,
+        year: Int,
+        semester: Semester,
+        name: String,
+    ): TimetableDto {
+        // Exceptions
+        if (name.isBlank()) {
+            throw TimetableNameBlankException()
+        }
+        val currentYear = LocalDate.now().year
+        if (year !in 2013..currentYear) {
+            throw TimetableInvalidYearException(currentYear)
+        }
+        if (timetableRepository.existsByUserIdAndYearAndSemesterAndName(user.id!!, year, semester, name)) {
+            throw TimetableDuplicateException()
+        }
+
+        // Create
+        val timetable = timetableRepository.save(
+            Timetable(
+                userId = user.id!!,
+                name = name,
+                year = year,
+                semester = semester,
+            )
+        )
+
+        return TimetableDto(timetable)
+    }
 
 }
