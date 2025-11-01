@@ -6,6 +6,6 @@ data class CourseSearchRequest(
     val year: Int,
     val semester: Semester,
     val keyword: String?,
-    val nextId: Int?,
+    val nextId: Long?,
     val limit: Int = 20,
 )
