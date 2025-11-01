@@ -1,9 +1,9 @@
 package com.wafflestudio.spring2025.course.service
 
-import com.wafflestudio.spring2025.board.BoardNameBlankException
-import com.wafflestudio.spring2025.board.BoardNameConflictException
+import com.wafflestudio.spring2025.common.enum.Semester
+import com.wafflestudio.spring2025.course.IllegalPeriodException
+import com.wafflestudio.spring2025.course.dto.CourseSearchResponse
 import com.wafflestudio.spring2025.course.dto.core.CourseDto
-import com.wafflestudio.spring2025.course.model.Course
 import com.wafflestudio.spring2025.course.repository.CourseRepository
 import org.springframework.stereotype.Service
 
@@ -11,21 +11,39 @@ import org.springframework.stereotype.Service
 class CourseService(
     private val courseRepository: CourseRepository,
 ) {
-    fun create(name: String): CourseDto {
-        if (name.isBlank()) {
-            throw BoardNameBlankException()
-        }
-        if (courseRepository.existsByName(name)) {
-            throw BoardNameConflictException()
-        }
-        val course =
-            courseRepository.save(
-                Course(
-                    name = name,
-                ),
-            )
-        return CourseDto(course)
+    fun searchByYearSemesterKeyword(
+        year: Int,
+        semester: Semester,
+        keyword: String?,
+        nextId: Long?,
+        limit: Int,
+    ): CourseSearchResponse {
+        validSearchPeriod(year, semester)
+        val queryLimit = limit + 1
+
+        val courses = courseRepository.search(
+            year = year,
+            semester = semester,
+            keyword = keyword,
+            nextId = nextId,
+            limit = queryLimit,
+        )
+
+        val hasNext = courses.size > limit
+        val coursesToReturn = if (hasNext) courses.take(limit) else courses
+        val nextId = coursesToReturn.lastOrNull()?.id
+
+        return CourseSearchResponse(
+            coursesToReturn.map { CourseDto(it) },
+            nextId = nextId,
+            hasNext = hasNext,
+        )
     }
 
-    fun list(): List<CourseDto> = courseRepository.findAll().map { CourseDto(it) }
+}
+
+fun validSearchPeriod(year: Int, semester: Semester) {
+    if (year != 2025 || semester != Semester.SUMMER) {
+        throw IllegalPeriodException()
+    }
 }

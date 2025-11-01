@@ -31,3 +31,10 @@ class CourseNameConflictException :
         httpStatusCode = HttpStatus.CONFLICT,
         msg = "Course name already exists",
     )
+
+class IllegalPeriodException :
+    CourseException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.NOT_FOUND,
+        msg = "Search for Illegal period",
+    )
