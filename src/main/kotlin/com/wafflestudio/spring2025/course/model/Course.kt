@@ -1,17 +1,34 @@
 package com.wafflestudio.spring2025.course.model
 
-import org.springframework.data.annotation.CreatedDate
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.wafflestudio.spring2025.course.crawling.ClassPlaceAndTime
 import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.relational.core.mapping.Table
-import java.time.Instant
+import org.springframework.data.mongodb.core.index.CompoundIndex
+import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.mongodb.core.mapping.Field
 
-@Table("courses")
-class Course(
-    @Id var id: Long? = null,
-    var name: String,
-    @CreatedDate
-    var createdAt: Instant? = null,
-    @LastModifiedDate
-    var updatedAt: Instant? = null,
+@Document("courses")
+@CompoundIndex(def = "{ 'year': 1, 'semester': 1 }")
+@CompoundIndex(def = "{ 'course_number': 1, 'lecture_number': 1 }")
+data class Course(
+    @Id
+    @JsonProperty("_id")
+    var id: String? = null,
+    var classification: String,
+    var college: String,
+    var department: String?,
+    @Field("course")
+    var academicCourse: String?,
+    @Field("academic_year")
+    var academicYear: String?,
+    @Field("course_number")
+    var courseNumber: String,
+    @Field("lecture_number")
+    var lectureNumber: String,
+    @Field("course_title")
+    var courseTitle: String,
+    var credit: Long,
+    @Field("class_time_json")
+    var classPlaceAndTimes: List<ClassPlaceAndTime>,
+    var instructor: String?,
 )
