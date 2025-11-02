@@ -159,4 +159,27 @@ class TimetableController(
             )
         return ResponseEntity.ok(addCourseResponse)
     }
+
+    @Operation(summary = "시간표에서 강의 삭제", description = "유저가 생성한 시간표에서 추가된 강의를 삭제합니다")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "204", description = "시간표에서 강의 삭제 성공"),
+            ApiResponse(responseCode = "400", description = "시간표에 삭제할 강의가 없음"),
+            ApiResponse(responseCode = "403", description = "다른 유저의 시간표에서 강의 삭제 시도"),
+            ApiResponse(responseCode = "404", description = "시간표를 찾지 못함"),
+        ],
+    )
+    @DeleteMapping("/timetables/{timetableId}/courses/{courseId}")
+    fun deleteCourse(
+        @Parameter(hidden = true) @LoggedInUser user: User,
+        @Parameter @PathVariable timetableId: Long,
+        @Parameter @PathVariable courseId: Long,
+    ): ResponseEntity<Unit> {
+        timetableService.deleteCourse(
+            user = user,
+            timetableId = timetableId,
+            courseId = courseId,
+        )
+        return ResponseEntity.noContent().build()
+    }
 }

@@ -8,4 +8,9 @@ interface EnrollRepository : ListCrudRepository<Enroll, Long> {
         timetableId: Long,
         courseId: Long,
     ): Boolean
+
+    fun deleteByTimetableIdAndCourseId(
+        timetableId: Long,
+        courseId: Long,
+    ): Boolean
 }

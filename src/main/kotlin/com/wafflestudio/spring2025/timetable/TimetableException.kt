@@ -67,3 +67,10 @@ class CourseDuplicateException :
         httpStatusCode = HttpStatus.CONFLICT,
         msg = "Course already added to this timetable",
     )
+
+class CourseNotExistsInTimetableException :
+    TimetableException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.BAD_REQUEST,
+        msg = "Course does not exists in timetable",
+    )

@@ -8,6 +8,7 @@ import com.wafflestudio.spring2025.course.model.Course
 import com.wafflestudio.spring2025.course.repository.CourseRepository
 import com.wafflestudio.spring2025.course.crawling.ClassPlaceAndTime
 import com.wafflestudio.spring2025.timetable.CourseDuplicateException
+import com.wafflestudio.spring2025.timetable.CourseNotExistsInTimetableException
 import com.wafflestudio.spring2025.timetable.CourseOverlapException
 import com.wafflestudio.spring2025.timetable.CourseTimetableNotMatchException
 import com.wafflestudio.spring2025.timetable.TimetableDuplicateException
@@ -23,6 +24,7 @@ import com.wafflestudio.spring2025.timetable.model.Timetable
 import com.wafflestudio.spring2025.timetable.repository.EnrollRepository
 import com.wafflestudio.spring2025.timetable.repository.TimetableRepository
 import com.wafflestudio.spring2025.user.model.User
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import kotlin.jvm.optionals.getOrNull
@@ -178,6 +180,25 @@ class TimetableService(
         )
 
         return courseRepository.findByTimetableId(timetableId).map { CourseDto(it) }
+    }
+
+    fun deleteCourse(
+        user: User,
+        timetableId: Long,
+        courseId: Long,
+    ) {
+        // Exceptions
+        val timetable = timetableRepository.findById(timetableId).getOrNull()
+            ?: throw TimetableNotFoundException()
+        if (user.id != timetable.userId) {
+            throw TimetableModifyForbiddenException()
+        }
+        if (!enrollRepository.existsByTimetableIdAndCourseId(timetableId, courseId)) {
+            throw CourseNotExistsInTimetableException()
+        }
+
+        // Delete course from timetable
+        enrollRepository.deleteByTimetableIdAndCourseId(timetableId, courseId)
     }
 
     private fun validateTimeConflict(newCourse: Course, existingCourses: List<Course>) {
