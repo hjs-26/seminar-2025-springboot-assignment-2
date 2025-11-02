@@ -31,4 +31,16 @@ interface CourseRepository : CrudRepository<Course, Long> {
         @Param("nextId") nextId: Long?,
         @Param("limit") limit: Int,
     ): List<Course>
+
+    @Query(
+        """
+        SELECT *
+        FROM courses c
+        INNER JOIN enrolls e ON e.course_id = c.id
+        WHERE e.timetable_id = :timetableId
+    """
+    )
+    fun findByTimetableId(
+        @Param("timetableId") timetableId: Long,
+    ): List<Course>
 }

@@ -2,6 +2,7 @@ package com.wafflestudio.spring2025.timetable.controller
 
 import com.wafflestudio.spring2025.timetable.dto.request.CreateTimetableRequest
 import com.wafflestudio.spring2025.timetable.dto.request.UpdateTimetableRequest
+import com.wafflestudio.spring2025.timetable.dto.response.TimetableDetailResponse
 import com.wafflestudio.spring2025.timetable.dto.response.TimetableListResponse
 import com.wafflestudio.spring2025.timetable.dto.response.TimetableResponse
 import com.wafflestudio.spring2025.timetable.service.TimetableService
@@ -112,5 +113,23 @@ class TimetableController(
             timetableId = timetableId,
         )
         return ResponseEntity.noContent().build()
+    }
+
+    @Operation(summary = "시간표 상세 조회", description = "특정 시간표의 기본 정보와 포함된 모든 강의의 상세 정보 및 학점 수 합을 조회합니다")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "시간표 상세 조회 성공"),
+            ApiResponse(responseCode = "404", description = "시간표를 찾지 못함")
+        ]
+    )
+    @GetMapping("/timetables/{timetableId}")
+    fun getDetail(
+        @Parameter @PathVariable timetableId: Long,
+    ): ResponseEntity<TimetableDetailResponse> {
+        val timetableDetailResponse =
+            timetableService.getDetail(
+                timetableId = timetableId,
+            )
+        return ResponseEntity.ok(timetableDetailResponse)
     }
 }

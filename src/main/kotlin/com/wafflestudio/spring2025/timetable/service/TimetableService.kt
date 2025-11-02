@@ -1,12 +1,15 @@
 package com.wafflestudio.spring2025.timetable.service
 
 import com.wafflestudio.spring2025.common.enum.Semester
+import com.wafflestudio.spring2025.course.dto.core.CourseDto
+import com.wafflestudio.spring2025.course.repository.CourseRepository
 import com.wafflestudio.spring2025.timetable.TimetableDuplicateException
 import com.wafflestudio.spring2025.timetable.TimetableInvalidYearException
 import com.wafflestudio.spring2025.timetable.TimetableModifyForbiddenException
 import com.wafflestudio.spring2025.timetable.TimetableNameBlankException
 import com.wafflestudio.spring2025.timetable.TimetableNotFoundException
 import com.wafflestudio.spring2025.timetable.dto.core.TimetableDto
+import com.wafflestudio.spring2025.timetable.dto.response.TimetableDetailResponse
 import com.wafflestudio.spring2025.timetable.model.Timetable
 import com.wafflestudio.spring2025.timetable.repository.TimetableRepository
 import com.wafflestudio.spring2025.user.model.User
@@ -17,6 +20,7 @@ import kotlin.jvm.optionals.getOrNull
 @Service
 class TimetableService(
     private val timetableRepository: TimetableRepository,
+    private val courseRepository: CourseRepository,
 ) {
     fun create(
         user: User,
@@ -104,5 +108,19 @@ class TimetableService(
 
         // Delete timetable
         timetableRepository.delete(timetable)
+    }
+
+    fun getDetail(
+        timetableId: Long,
+    ): TimetableDetailResponse {
+        val timetable = timetableRepository.findById(timetableId).getOrNull()
+            ?: throw TimetableNotFoundException()
+        val courses = courseRepository.findByTimetableId(timetableId)
+        val credits = courses.sumOf { it.credit }
+        return TimetableDetailResponse(
+            timetable = TimetableDto(timetable),
+            courses = courses.map { CourseDto(it) },
+            credits = credits,
+        )
     }
 }
