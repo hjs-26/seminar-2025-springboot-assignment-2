@@ -120,8 +120,8 @@ class TimetableController(
     @ApiResponses(
         value = [
             ApiResponse(responseCode = "200", description = "시간표 상세 조회 성공"),
-            ApiResponse(responseCode = "404", description = "시간표를 찾지 못함")
-        ]
+            ApiResponse(responseCode = "404", description = "시간표를 찾지 못함"),
+        ],
     )
     @GetMapping("/timetables/{timetableId}")
     fun getDetail(
@@ -142,8 +142,8 @@ class TimetableController(
             ApiResponse(responseCode = "403", description = "다른 유저의 시간표에 강의 추가 시도"),
             ApiResponse(responseCode = "404", description = "시간표나 강의를 찾지 못함"),
             ApiResponse(responseCode = "409", description = "시간표에 이미 추가된 강의이거나 기존 강의와 시간이 겹침"),
-            ApiResponse(responseCode = "503", description = "강의 시간 정보 크롤링 실패")
-        ]
+            ApiResponse(responseCode = "503", description = "강의 시간 정보 크롤링 실패"),
+        ],
     )
     @PostMapping("/timetables/{timetableId}/courses/{courseId}")
     fun addCourse(

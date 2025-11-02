@@ -6,7 +6,6 @@ import com.wafflestudio.spring2025.comment.model.Comment
 import com.wafflestudio.spring2025.comment.repository.CommentRepository
 import com.wafflestudio.spring2025.common.enum.Semester
 import com.wafflestudio.spring2025.course.crawling.ClassPlaceAndTime
-import com.wafflestudio.spring2025.course.crawling.DayOfWeek
 import com.wafflestudio.spring2025.course.model.Course
 import com.wafflestudio.spring2025.course.repository.CourseRepository
 import com.wafflestudio.spring2025.post.model.Post

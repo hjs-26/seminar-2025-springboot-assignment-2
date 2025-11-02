@@ -330,15 +330,17 @@ class TimetableIntegrationTest
             // 시간표에 강의를 추가할 수 있다
             val (user, token) = dataGenerator.generateUser()
             val timetable = dataGenerator.generateTimetable(name = "2025-2 시간표", year = 2025, semester = Semester.FALL, user = user)
-            val course = dataGenerator.generateCourse(
-                year = 2025,
-                semester = Semester.FALL,
-                courseTitle = "자료구조",
-                credit = 3,
-                classTimeJson = listOf(
-                    ClassPlaceAndTime(day = DayOfWeek.MONDAY, place = "302-308", startMinute = 540, endMinute = 630),
-                ),
-            )
+            val course =
+                dataGenerator.generateCourse(
+                    year = 2025,
+                    semester = Semester.FALL,
+                    courseTitle = "자료구조",
+                    credit = 3,
+                    classTimeJson =
+                        listOf(
+                            ClassPlaceAndTime(day = DayOfWeek.MONDAY, place = "302-308", startMinute = 540, endMinute = 630),
+                        ),
+                )
 
             mvc
                 .perform(
@@ -355,22 +357,26 @@ class TimetableIntegrationTest
             val (user, token) = dataGenerator.generateUser()
             val timetable = dataGenerator.generateTimetable(name = "2025-2 시간표", year = 2025, semester = Semester.FALL, user = user)
 
-            val course1 = dataGenerator.generateCourse(
-                year = 2025,
-                semester = Semester.FALL,
-                courseTitle = "자료구조",
-                classTimeJson = listOf(
-                    ClassPlaceAndTime(day = DayOfWeek.MONDAY, place = "302-308", startMinute = 540, endMinute = 630),
-                ),
-            )
-            val course2 = dataGenerator.generateCourse(
-                year = 2025,
-                semester = Semester.FALL,
-                courseTitle = "알고리즘",
-                classTimeJson = listOf(
-                    ClassPlaceAndTime(day = DayOfWeek.MONDAY, place = "302-309", startMinute = 600, endMinute = 690),
-                ),
-            )
+            val course1 =
+                dataGenerator.generateCourse(
+                    year = 2025,
+                    semester = Semester.FALL,
+                    courseTitle = "자료구조",
+                    classTimeJson =
+                        listOf(
+                            ClassPlaceAndTime(day = DayOfWeek.MONDAY, place = "302-308", startMinute = 540, endMinute = 630),
+                        ),
+                )
+            val course2 =
+                dataGenerator.generateCourse(
+                    year = 2025,
+                    semester = Semester.FALL,
+                    courseTitle = "알고리즘",
+                    classTimeJson =
+                        listOf(
+                            ClassPlaceAndTime(day = DayOfWeek.MONDAY, place = "302-309", startMinute = 600, endMinute = 690),
+                        ),
+                )
 
             // 첫 번째 강의 추가 성공
             mvc
@@ -447,14 +453,16 @@ class TimetableIntegrationTest
             // 이미 추가된 강의를 다시 추가하면 에러를 반환한다
             val (user, token) = dataGenerator.generateUser()
             val timetable = dataGenerator.generateTimetable(name = "2025-2 시간표", year = 2025, semester = Semester.FALL, user = user)
-            val course = dataGenerator.generateCourse(
-                year = 2025,
-                semester = Semester.FALL,
-                courseTitle = "자료구조",
-                classTimeJson = listOf(
-                    ClassPlaceAndTime(day = DayOfWeek.MONDAY, place = "302-308", startMinute = 540, endMinute = 630),
-                ),
-            )
+            val course =
+                dataGenerator.generateCourse(
+                    year = 2025,
+                    semester = Semester.FALL,
+                    courseTitle = "자료구조",
+                    classTimeJson =
+                        listOf(
+                            ClassPlaceAndTime(day = DayOfWeek.MONDAY, place = "302-308", startMinute = 540, endMinute = 630),
+                        ),
+                )
 
             // 첫 번째 추가 성공
             mvc

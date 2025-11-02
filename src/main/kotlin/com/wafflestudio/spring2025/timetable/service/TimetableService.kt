@@ -1,12 +1,11 @@
 package com.wafflestudio.spring2025.timetable.service
 
 import com.wafflestudio.spring2025.common.enum.Semester
-import com.wafflestudio.spring2025.course.ClassTimeCrawlingException
 import com.wafflestudio.spring2025.course.CourseNotFoundException
+import com.wafflestudio.spring2025.course.crawling.ClassPlaceAndTime
 import com.wafflestudio.spring2025.course.dto.core.CourseDto
 import com.wafflestudio.spring2025.course.model.Course
 import com.wafflestudio.spring2025.course.repository.CourseRepository
-import com.wafflestudio.spring2025.course.crawling.ClassPlaceAndTime
 import com.wafflestudio.spring2025.timetable.CourseDuplicateException
 import com.wafflestudio.spring2025.timetable.CourseNotExistsInTimetableException
 import com.wafflestudio.spring2025.timetable.CourseOverlapException
@@ -24,7 +23,6 @@ import com.wafflestudio.spring2025.timetable.model.Timetable
 import com.wafflestudio.spring2025.timetable.repository.EnrollRepository
 import com.wafflestudio.spring2025.timetable.repository.TimetableRepository
 import com.wafflestudio.spring2025.user.model.User
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import kotlin.jvm.optionals.getOrNull
@@ -92,7 +90,7 @@ class TimetableService(
                 user.id!!,
                 timetable.year,
                 timetable.semester,
-                name
+                name,
             )
         ) {
             throw TimetableDuplicateException()
@@ -129,12 +127,11 @@ class TimetableService(
         timetableRepository.delete(timetable)
     }
 
-    fun getDetail(
-        timetableId: Long,
-    ): TimetableDetailResponse {
+    fun getDetail(timetableId: Long): TimetableDetailResponse {
         // Exceptions
-        val timetable = timetableRepository.findById(timetableId).getOrNull()
-            ?: throw TimetableNotFoundException()
+        val timetable =
+            timetableRepository.findById(timetableId).getOrNull()
+                ?: throw TimetableNotFoundException()
 
         // Get timetable detail response
         val courses = courseRepository.findByTimetableId(timetableId)
@@ -153,13 +150,15 @@ class TimetableService(
         courseId: Long,
     ): AddCourseResponse {
         // Exceptions
-        val timetable = timetableRepository.findById(timetableId).getOrNull()
-            ?: throw TimetableNotFoundException()
+        val timetable =
+            timetableRepository.findById(timetableId).getOrNull()
+                ?: throw TimetableNotFoundException()
         if (user.id != timetable.userId) {
             throw TimetableModifyForbiddenException()
         }
-        val newCourse = courseRepository.findById(courseId).getOrNull()
-            ?: throw CourseNotFoundException()
+        val newCourse =
+            courseRepository.findById(courseId).getOrNull()
+                ?: throw CourseNotFoundException()
         if (newCourse.year != timetable.year || newCourse.semester != timetable.semester) {
             throw CourseTimetableNotMatchException()
         }
@@ -176,7 +175,7 @@ class TimetableService(
             Enroll(
                 timetableId = timetableId,
                 courseId = courseId,
-            )
+            ),
         )
 
         return courseRepository.findByTimetableId(timetableId).map { CourseDto(it) }
@@ -188,8 +187,9 @@ class TimetableService(
         courseId: Long,
     ) {
         // Exceptions
-        val timetable = timetableRepository.findById(timetableId).getOrNull()
-            ?: throw TimetableNotFoundException()
+        val timetable =
+            timetableRepository.findById(timetableId).getOrNull()
+                ?: throw TimetableNotFoundException()
         if (user.id != timetable.userId) {
             throw TimetableModifyForbiddenException()
         }
@@ -201,7 +201,10 @@ class TimetableService(
         enrollRepository.deleteByTimetableIdAndCourseId(timetableId, courseId)
     }
 
-    private fun validateTimeConflict(newCourse: Course, existingCourses: List<Course>) {
+    private fun validateTimeConflict(
+        newCourse: Course,
+        existingCourses: List<Course>,
+    ) {
         val newCourseTimes = newCourse.classTimeJson ?: return
 
         for (existingCourse in existingCourses) {
@@ -217,9 +220,11 @@ class TimetableService(
         }
     }
 
-    private fun isTimeOverlap(time1: ClassPlaceAndTime, time2: ClassPlaceAndTime): Boolean {
-        return time1.day == time2.day &&
+    private fun isTimeOverlap(
+        time1: ClassPlaceAndTime,
+        time2: ClassPlaceAndTime,
+    ): Boolean =
+        time1.day == time2.day &&
             time1.endMinute > time2.startMinute &&
             time2.endMinute > time1.startMinute
-    }
 }
