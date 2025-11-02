@@ -12,5 +12,5 @@ interface EnrollRepository : ListCrudRepository<Enroll, Long> {
     fun deleteByTimetableIdAndCourseId(
         timetableId: Long,
         courseId: Long,
-    ): Boolean
+    ): Int
 }
