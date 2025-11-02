@@ -46,3 +46,24 @@ class TimetableModifyForbiddenException :
         httpStatusCode = HttpStatus.FORBIDDEN,
         msg = "You don't have permission to modify this timetable",
     )
+
+class CourseTimetableNotMatchException :
+    TimetableException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.BAD_REQUEST,
+        msg = "Invalid course: year or semester does not match timetable",
+    )
+
+class CourseOverlapException :
+    TimetableException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.CONFLICT,
+        msg = "Invalid course: new course time should not overlap with existing courses",
+    )
+
+class CourseDuplicateException :
+    TimetableException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.CONFLICT,
+        msg = "Course already added to this timetable",
+    )

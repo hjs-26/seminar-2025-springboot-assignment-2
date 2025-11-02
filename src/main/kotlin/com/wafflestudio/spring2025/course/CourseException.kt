@@ -38,3 +38,10 @@ class IllegalPeriodException :
         httpStatusCode = HttpStatus.BAD_REQUEST,
         msg = "Search for Illegal period",
     )
+
+class ClassTimeCrawlingException :
+    CourseException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.SERVICE_UNAVAILABLE,
+        msg = "ClassTimeJSON is null.",
+    )

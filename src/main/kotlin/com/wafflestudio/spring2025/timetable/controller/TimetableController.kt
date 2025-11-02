@@ -2,6 +2,7 @@ package com.wafflestudio.spring2025.timetable.controller
 
 import com.wafflestudio.spring2025.timetable.dto.request.CreateTimetableRequest
 import com.wafflestudio.spring2025.timetable.dto.request.UpdateTimetableRequest
+import com.wafflestudio.spring2025.timetable.dto.response.AddCourseResponse
 import com.wafflestudio.spring2025.timetable.dto.response.TimetableDetailResponse
 import com.wafflestudio.spring2025.timetable.dto.response.TimetableListResponse
 import com.wafflestudio.spring2025.timetable.dto.response.TimetableResponse
@@ -131,5 +132,31 @@ class TimetableController(
                 timetableId = timetableId,
             )
         return ResponseEntity.ok(timetableDetailResponse)
+    }
+
+    @Operation(summary = "시간표에 강의 추가", description = "유저가 생성한 시간표에 강의를 추가합니다")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "시간표에 강의 추가 성공"),
+            ApiResponse(responseCode = "400", description = "시간표와 강의의 년도와 학기가 맞지 않음"),
+            ApiResponse(responseCode = "403", description = "다른 유저의 시간표에 강의 추가 시도"),
+            ApiResponse(responseCode = "404", description = "시간표나 강의를 찾지 못함"),
+            ApiResponse(responseCode = "409", description = "시간표에 이미 추가된 강의이거나 기존 강의와 시간이 겹침"),
+            ApiResponse(responseCode = "503", description = "강의 시간 정보 크롤링 실패")
+        ]
+    )
+    @PostMapping("/timetables/{timetableId}/courses/{courseId}")
+    fun addCourse(
+        @Parameter(hidden = true) @LoggedInUser user: User,
+        @Parameter @PathVariable timetableId: Long,
+        @Parameter @PathVariable courseId: Long,
+    ): ResponseEntity<AddCourseResponse> {
+        val addCourseResponse =
+            timetableService.addCourse(
+                user = user,
+                timetableId = timetableId,
+                courseId = courseId,
+            )
+        return ResponseEntity.ok(addCourseResponse)
     }
 }
