@@ -1,4 +1,4 @@
-package com.wafflestudio.spring2025.course.model
+package com.wafflestudio.spring2025.course.crawling
 
 data class CourseClassTime(
     val dayOfWeek: String,

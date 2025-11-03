@@ -24,7 +24,6 @@ interface PostRepository : CrudRepository<Post, Long> {
         JOIN users u ON p.user_id = u.id
         JOIN boards b ON p.board_id = b.id
         WHERE p.id = :postId
-        GROUP BY p.id, u.id, b.id
         """,
     )
     fun findByIdWithUserAndBoard(

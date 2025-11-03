@@ -1,2 +1,2 @@
-GET http://localhost:8080/api/v1/courses/fetch?trace=true
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTc2MTgyMDQ2MiwiZXhwIjoxNzYxOTA2ODYyfQ._IodhHBoEccSmLlG_RjYq-ri_72GnsOF86c77M-I8cE
+POST http://localhost:8080/api/v1/courses/fetch?year=2025&semester=SUMMER
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTc2MjA5MTIyNSwiZXhwIjoxNzYyMTc3NjI1fQ.4n4UYghR1dhx9pAGyhNa2xDyxBJohHmSFrPGIeLe-nI

@@ -1,4 +1,4 @@
-package com.wafflestudio.spring2025.course.model
+package com.wafflestudio.spring2025.course.crawling
 
 import com.fasterxml.jackson.annotation.JsonValue
 import org.springframework.core.convert.converter.Converter
