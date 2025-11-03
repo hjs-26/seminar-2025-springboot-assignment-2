@@ -1,10 +1,12 @@
 package com.wafflestudio.spring2025.course.service
 
 import com.wafflestudio.spring2025.common.enum.Semester
+import com.wafflestudio.spring2025.course.CourseNotFoundException
 import com.wafflestudio.spring2025.course.IllegalPeriodException
 import com.wafflestudio.spring2025.course.dto.CourseSearchResponse
 import com.wafflestudio.spring2025.course.dto.core.CourseDto
 import com.wafflestudio.spring2025.course.repository.CourseRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
@@ -41,5 +43,11 @@ class CourseService(
             nextId = nextId,
             hasNext = hasNext,
         )
+    }
+
+    fun getById(id: Long): CourseDto {
+        val course = courseRepository.findByIdOrNull(id)
+            ?: throw CourseNotFoundException()
+        return CourseDto(course)
     }
 }

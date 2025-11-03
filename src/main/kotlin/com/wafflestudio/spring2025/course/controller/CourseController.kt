@@ -3,16 +3,19 @@ package com.wafflestudio.spring2025.course.controller
 import com.wafflestudio.spring2025.common.enum.Semester
 import com.wafflestudio.spring2025.course.dto.CourseSearchRequest
 import com.wafflestudio.spring2025.course.dto.CourseSearchResponse
+import com.wafflestudio.spring2025.course.dto.core.CourseDto
+import com.wafflestudio.spring2025.course.model.Course
 import com.wafflestudio.spring2025.course.service.CourseService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/v1/course")
+@RequestMapping("/api/v1/courses")
 class CourseController(
     private val courseService: CourseService,
 ) {
@@ -35,5 +38,11 @@ class CourseController(
         return ResponseEntity.ok(coursePagingResponse)
     }
 
-
+    @GetMapping("/{id}")
+    fun get(
+        @PathVariable id: Long,
+    ): ResponseEntity<CourseDto> {
+        val courseDto = courseService.getById(id)
+        return ResponseEntity.ok(courseDto)
+    }
 }
