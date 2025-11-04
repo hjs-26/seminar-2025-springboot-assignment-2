@@ -17,9 +17,9 @@ class SwaggerConfig {
         return OpenAPI()
             .info(
                 Info()
-                    .title("Seminar 2025 Spring Boot API")
+                    .title("Wafflestudio 2025 Spring Boot Seminar Group9 Assignment2 API")
                     .version("1.0")
-                    .description("시간표 관리 API 문서"),
+                    .description("에브리타임 클론코딩 API 문서"),
             ).addSecurityItem(
                 SecurityRequirement().addList(securitySchemeName),
             ).components(
@@ -31,7 +31,7 @@ class SwaggerConfig {
                             .type(SecurityScheme.Type.HTTP)
                             .scheme("bearer")
                             .bearerFormat("JWT")
-                            .description("JWT 토큰을 입력하세요 (Bearer 제외)"),
+                            .description("JWT 토큰을 입력하세요"),
                     ),
             )
     }

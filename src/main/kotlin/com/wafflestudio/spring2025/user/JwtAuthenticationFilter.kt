@@ -11,6 +11,8 @@ import org.springframework.web.filter.OncePerRequestFilter
 class JwtAuthenticationFilter(
     private val jwtTokenProvider: JwtTokenProvider,
 ) : OncePerRequestFilter() {
+    private val pathMatcher = AntPathMatcher()
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -42,10 +44,8 @@ class JwtAuthenticationFilter(
         return null
     }
 
-    private fun isPublicPath(path: String): Boolean {
-        val pathMatcher = AntPathMatcher()
-        return pathMatcher.match("/api/v1/auth/**", path) ||
+    private fun isPublicPath(path: String): Boolean =
+        pathMatcher.match("/api/v1/auth/**", path) ||
             pathMatcher.match("/swagger-ui/**", path) ||
             pathMatcher.match("/v3/api-docs/**", path)
-    }
 }
