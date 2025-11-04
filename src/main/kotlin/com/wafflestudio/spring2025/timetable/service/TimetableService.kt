@@ -9,6 +9,7 @@ import com.wafflestudio.spring2025.course.repository.CourseRepository
 import com.wafflestudio.spring2025.timetable.CourseDuplicateException
 import com.wafflestudio.spring2025.timetable.CourseNotExistsInTimetableException
 import com.wafflestudio.spring2025.timetable.CourseOverlapException
+import com.wafflestudio.spring2025.timetable.CourseTimeNotAvailableException
 import com.wafflestudio.spring2025.timetable.CourseTimetableNotMatchException
 import com.wafflestudio.spring2025.timetable.TimetableDuplicateException
 import com.wafflestudio.spring2025.timetable.TimetableInvalidYearException
@@ -205,10 +206,14 @@ class TimetableService(
         newCourse: Course,
         existingCourses: List<Course>,
     ) {
-        val newCourseTimes = newCourse.classTimeJson ?: return
+        val newCourseTimes =
+            newCourse.classTimeJson
+                ?: throw CourseTimeNotAvailableException()
 
         for (existingCourse in existingCourses) {
-            val existingCourseTimes = existingCourse.classTimeJson ?: continue
+            val existingCourseTimes =
+                existingCourse.classTimeJson
+                    ?: throw CourseTimeNotAvailableException()
 
             for (newTime in newCourseTimes) {
                 for (existingTime in existingCourseTimes) {

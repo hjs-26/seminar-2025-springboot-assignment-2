@@ -74,3 +74,10 @@ class CourseNotExistsInTimetableException :
         httpStatusCode = HttpStatus.BAD_REQUEST,
         msg = "Course does not exist in timetable",
     )
+
+class CourseTimeNotAvailableException :
+    TimetableException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.SERVICE_UNAVAILABLE,
+        msg = "Course time information is not available yet",
+    )

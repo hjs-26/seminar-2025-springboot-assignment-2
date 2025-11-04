@@ -18,30 +18,9 @@ class CourseNotFoundException :
         msg = "Course not found",
     )
 
-class CourseNameBlankException :
-    CourseException(
-        errorCode = 0,
-        httpStatusCode = HttpStatus.BAD_REQUEST,
-        msg = "Course name is blank",
-    )
-
-class CourseNameConflictException :
-    CourseException(
-        errorCode = 0,
-        httpStatusCode = HttpStatus.CONFLICT,
-        msg = "Course name already exists",
-    )
-
 class IllegalPeriodException :
     CourseException(
         errorCode = 0,
         httpStatusCode = HttpStatus.BAD_REQUEST,
         msg = "Search for Illegal period",
-    )
-
-class ClassTimeCrawlingException :
-    CourseException(
-        errorCode = 0,
-        httpStatusCode = HttpStatus.SERVICE_UNAVAILABLE,
-        msg = "ClassTimeJSON is null.",
     )
