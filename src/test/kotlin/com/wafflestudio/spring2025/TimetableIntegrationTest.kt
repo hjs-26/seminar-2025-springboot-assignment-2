@@ -347,8 +347,9 @@ class TimetableIntegrationTest
                     post("/api/v1/timetables/${timetable.id}/courses/${course.id}")
                         .header("Authorization", "Bearer $token"),
                 ).andExpect(status().isOk)
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].courseTitle").value("자료구조"))
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.courseTitle").value("자료구조"))
+                .andExpect(jsonPath("$.credit").value(3))
         }
 
         @Test

@@ -178,7 +178,7 @@ class TimetableService(
             ),
         )
 
-        return courseRepository.findByTimetableId(timetableId).map { CourseDto(it) }
+        return CourseDto(newCourse)
     }
 
     fun deleteCourse(
