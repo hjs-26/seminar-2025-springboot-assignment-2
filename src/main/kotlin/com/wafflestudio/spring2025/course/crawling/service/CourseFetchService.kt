@@ -73,26 +73,23 @@ class CourseFetchServiceImpl(
         year: Int,
         semester: Semester,
     ): Course {
-        fun List<Cell>.getCellByColumnName(key: String): String =
-            this
-                .getOrNull(
-                    columnNameIndex.getOrElse(key) {
-                        this.size
-                    },
-                )?.stringCellValue ?: ""
+        fun List<Cell>.getCellByColumnName(key: String): String? =
+            columnNameIndex[key]?.let { index ->
+                this.getOrNull(index)?.stringCellValue
+            }
 
         val classification = row.getCellByColumnName("교과구분")
         val college = row.getCellByColumnName("개설대학")
         val department = row.getCellByColumnName("개설학과")
         val academicCourse = row.getCellByColumnName("이수과정")
         val academicYear = row.getCellByColumnName("학년")
-        val courseNumber = row.getCellByColumnName("교과목번호")
-        val lectureNumber = row.getCellByColumnName("강좌번호")
-        val courseTitle = row.getCellByColumnName("교과목명")
+        val courseNumber = row.getCellByColumnName("교과목번호") ?: throw IllegalArgumentException("필수 컬럼 '교과목번호'가 없습니다")
+        val lectureNumber = row.getCellByColumnName("강좌번호") ?: throw IllegalArgumentException("필수 컬럼 '강좌번호'가 없습니다")
+        val courseTitle = row.getCellByColumnName("교과목명") ?: throw IllegalArgumentException("필수 컬럼 '교과목명'이 없습니다")
         val courseSubtitle = row.getCellByColumnName("부제명")
-        val credit = row.getCellByColumnName("학점").toLongOrNull() ?: 0L
-        val classTimeText = row.getCellByColumnName("수업교시")
-        val location = row.getCellByColumnName("강의실(동-호)(#연건, *평창)")
+        val credit = row.getCellByColumnName("학점")?.toLongOrNull() ?: 0L
+        val classTimeText = row.getCellByColumnName("수업교시") ?: ""
+        val location = row.getCellByColumnName("강의실(동-호)(#연건, *평창)") ?: ""
         val instructor = row.getCellByColumnName("주담당교수")
 
         val classTimes =
@@ -101,14 +98,14 @@ class CourseFetchServiceImpl(
                 location.split("/"),
             )
 
-        val courseFullTitle = if (courseSubtitle.isEmpty()) courseTitle else "$courseTitle ($courseSubtitle)"
+        val courseFullTitle = if (courseSubtitle.isNullOrEmpty()) courseTitle else "$courseTitle ($courseSubtitle)"
 
         return Course(
             year = year,
             semester = semester,
             classification = classification,
             college = college,
-            department = department.replace("null", "").ifEmpty { college },
+            department = department?.replace("null", "")?.ifEmpty { college } ?: college,
             academicCourse = academicCourse,
             academicYear = if (academicCourse != "학사") academicCourse else academicYear,
             courseNumber = courseNumber,
