@@ -136,7 +136,7 @@ class DataGenerator(
                     courseNumber = courseNumber ?: "L0000-${Random.nextInt(10000)}",
                     lectureNumber = lectureNumber ?: "001",
                     courseTitle = courseTitle ?: "강의-${Random.nextInt(1000000)}",
-                    credit = credit ?: 3,
+                    credit = credit ?: 3L,
                     instructor = instructor,
                     classTimeJson = classTimeJson,
                 ),

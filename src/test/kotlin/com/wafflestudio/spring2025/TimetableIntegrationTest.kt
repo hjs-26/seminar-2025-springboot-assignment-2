@@ -762,4 +762,10 @@ class TimetableIntegrationTest
                         .contentType(MediaType.APPLICATION_JSON),
                 ).andExpect(status().isNotFound)
         }
+
+        @Test
+        @Disabled("곧 안내드리겠습니다")
+        fun `should fetch and save course information from SNU course registration site`() {
+            // 서울대 수강신청 사이트에서 강의 정보를 가져와 저장할 수 있다
+        }
     }
