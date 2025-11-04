@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.wafflestudio.spring2025.common.enum.Semester
 import com.wafflestudio.spring2025.course.crawling.ClassPlaceAndTime
 import com.wafflestudio.spring2025.course.crawling.DayOfWeek
+import com.wafflestudio.spring2025.course.dto.CourseSearchResponse
 import com.wafflestudio.spring2025.helper.DataGenerator
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,6 +34,11 @@ class TimetableIntegrationTest
         private val mapper: ObjectMapper,
         private val dataGenerator: DataGenerator,
     ) {
+        @BeforeEach
+        fun setUp() {
+            dataGenerator.cleanupCourses()
+        }
+
         // ========== 시간표 생성 테스트 ==========
         @Test
         fun `should create a timetable`() {
@@ -542,17 +549,214 @@ class TimetableIntegrationTest
                 ).andExpect(status().isNotFound)
         }
 
-        // ========== 강의 검색 (Course 패키지 담당 - 최연서 & 손현준) ==========
+        // Course 검색 테스트 ====================================================
+
         @Test
-        @Disabled("강의 검색 기능 구현 후 테스트")
-        fun `should search for courses`() {
-            // 강의를 검색할 수 있다
+        fun `should search courses by year and semester without keyword`() {
+            // 검색어 없이 연도와 학기로 강의를 검색할 수 있다
+            val (_, token) = dataGenerator.generateUser()
+
+            repeat(2) {
+                dataGenerator.generateCourse(
+                    year = 2025,
+                    semester = Semester.FALL,
+                    courseTitle = "2025 가을 강의 $it",
+                )
+            }
+            repeat(2) {
+                dataGenerator.generateCourse(
+                    year = 2024,
+                    semester = Semester.SPRING,
+                    courseTitle = "2024 봄 강의 $it",
+                )
+            }
+            repeat(2) {
+                dataGenerator.generateCourse(
+                    year = 2025,
+                    semester = Semester.SUMMER,
+                    courseTitle = "2025 여름 강의 $it",
+                )
+            }
+
+            mvc
+                .perform(
+                    get("/api/v1/courses")
+                        .header("Authorization", "Bearer $token")
+                        .param("year", "2025")
+                        .param("semester", "FALL")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(status().isOk)
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.hasNext").value(false))
         }
 
         @Test
-        @Disabled("강의 검색은 course 패키지에서 담당")
-        fun `should paginate correctly when searching for courses`() {
+        fun `should search courses by keyword in course title`() {
+            // 강의명으로 강의를 검색할 수 있다
+            val (_, token) = dataGenerator.generateUser()
+
+            dataGenerator.generateCourse(courseTitle = "데이터구조", instructor = "홍길동")
+            dataGenerator.generateCourse(courseTitle = "알고리즘", instructor = "김철수")
+            dataGenerator.generateCourse(courseTitle = "데이터베이스", instructor = "박영희")
+
+            mvc
+                .perform(
+                    get("/api/v1/courses")
+                        .header("Authorization", "Bearer $token")
+                        .param("year", "2025")
+                        .param("semester", "FALL")
+                        .param("keyword", "데이터")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(status().isOk)
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.hasNext").value(false))
+        }
+
+        @Test
+        fun `should search courses by keyword in instructor name`() {
+            // 교수명으로 강의를 검색할 수 있다
+            val (_, token) = dataGenerator.generateUser()
+
+            dataGenerator.generateCourse(courseTitle = "데이터구조", instructor = "홍길동")
+            dataGenerator.generateCourse(courseTitle = "알고리즘", instructor = "김철수")
+            dataGenerator.generateCourse(courseTitle = "운영체제", instructor = "홍길동")
+
+            mvc
+                .perform(
+                    get("/api/v1/courses")
+                        .header("Authorization", "Bearer $token")
+                        .param("year", "2025")
+                        .param("semester", "FALL")
+                        .param("keyword", "홍길동")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(status().isOk)
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.hasNext").value(false))
+        }
+
+        @Test
+        fun `should paginate correctly when searching for courses2`() {
             // 강의 검색 시, 페이지네이션이 올바르게 동작한다
+            val (_, token) = dataGenerator.generateUser()
+
+            repeat(50) {
+                dataGenerator.generateCourse(courseTitle = "강의 $it", instructor = "교수 $it")
+            }
+
+            // 첫 번째 페이지
+            val firstResponse =
+                mvc
+                    .perform(
+                        get("/api/v1/courses")
+                            .header("Authorization", "Bearer $token")
+                            .param("year", "2025")
+                            .param("semester", "FALL")
+                            .contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(status().isOk)
+                    .andExpect(jsonPath("$.data.length()").value(20))
+                    .andExpect(jsonPath("$.hasNext").value(true))
+                    .andReturn()
+                    .response
+                    .getContentAsString(Charsets.UTF_8)
+                    .let {
+                        mapper.readValue(it, CourseSearchResponse::class.java)
+                    }
+
+            // 두 번째 페이지
+            val secondResponse =
+                mvc
+                    .perform(
+                        get("/api/v1/courses")
+                            .header("Authorization", "Bearer $token")
+                            .param("year", "2025")
+                            .param("semester", "FALL")
+                            .param("nextId", firstResponse.nextId.toString())
+                            .contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(status().isOk)
+                    .andExpect(jsonPath("$.data.length()").value(20))
+                    .andExpect(jsonPath("$.hasNext").value(true))
+                    .andReturn()
+                    .response
+                    .getContentAsString(Charsets.UTF_8)
+                    .let {
+                        mapper.readValue(it, CourseSearchResponse::class.java)
+                    }
+
+            // 세 번째 페이지 (마지막)
+            mvc
+                .perform(
+                    get("/api/v1/courses")
+                        .header("Authorization", "Bearer $token")
+                        .param("year", "2025")
+                        .param("semester", "FALL")
+                        .param("nextId", secondResponse.nextId.toString())
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(status().isOk)
+                .andExpect(jsonPath("$.data.length()").value(10))
+                .andExpect(jsonPath("$.hasNext").value(false))
+
+            // 중복 검증? 꼭 필요할까요?
+        }
+
+        @Test
+        fun `should return error for invalid year`() {
+            // 유효하지 않은 연도는 검색할 수 없다 (2013년 이전, 미래 연도)
+            val (_, token) = dataGenerator.generateUser()
+            val futureYear =
+                java.time.LocalDate
+                    .now()
+                    .year + 1
+
+            // 2012년 (2013년 이전)
+            mvc
+                .perform(
+                    get("/api/v1/courses")
+                        .header("Authorization", "Bearer $token")
+                        .param("year", "2012")
+                        .param("semester", "FALL")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(status().isBadRequest)
+
+            // 미래 연도
+            mvc
+                .perform(
+                    get("/api/v1/courses")
+                        .header("Authorization", "Bearer $token")
+                        .param("year", futureYear.toString())
+                        .param("semester", "FALL")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(status().isBadRequest)
+        }
+
+        @Test
+        fun `should retrieve a single course by id`() {
+            // 강의 ID로 강의를 단건 조회할 수 있다
+            val (_, token) = dataGenerator.generateUser()
+            val course = dataGenerator.generateCourse(courseTitle = "데이터구조", instructor = "홍길동", credit = 3L)
+
+            mvc
+                .perform(
+                    get("/api/v1/courses/${course.id}")
+                        .header("Authorization", "Bearer $token")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(status().isOk)
+                .andExpect(jsonPath("$.id").value(course.id!!))
+                .andExpect(jsonPath("$.courseTitle").value("데이터구조"))
+                .andExpect(jsonPath("$.instructor").value("홍길동"))
+                .andExpect(jsonPath("$.credit").value(3))
+        }
+
+        @Test
+        fun `should return 404 when course not found`() {
+            // 존재하지 않는 강의 조회 시 404 에러를 반환한다
+            val (_, token) = dataGenerator.generateUser()
+
+            mvc
+                .perform(
+                    get("/api/v1/courses/99999")
+                        .header("Authorization", "Bearer $token")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(status().isNotFound)
         }
 
         @Test
