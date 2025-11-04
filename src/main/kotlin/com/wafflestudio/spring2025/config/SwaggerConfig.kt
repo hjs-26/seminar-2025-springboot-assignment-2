@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class SwaggerConfig {
-
     @Bean
     fun customOpenAPI(): OpenAPI {
         val securitySchemeName = "bearerAuth"
@@ -20,12 +19,10 @@ class SwaggerConfig {
                 Info()
                     .title("Seminar 2025 Spring Boot API")
                     .version("1.0")
-                    .description("시간표 관리 API 문서")
-            )
-            .addSecurityItem(
-                SecurityRequirement().addList(securitySchemeName)
-            )
-            .components(
+                    .description("시간표 관리 API 문서"),
+            ).addSecurityItem(
+                SecurityRequirement().addList(securitySchemeName),
+            ).components(
                 Components()
                     .addSecuritySchemes(
                         securitySchemeName,
@@ -34,8 +31,8 @@ class SwaggerConfig {
                             .type(SecurityScheme.Type.HTTP)
                             .scheme("bearer")
                             .bearerFormat("JWT")
-                            .description("JWT 토큰을 입력하세요 (Bearer 제외)")
-                    )
+                            .description("JWT 토큰을 입력하세요 (Bearer 제외)"),
+                    ),
             )
     }
 }
