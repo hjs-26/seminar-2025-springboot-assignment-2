@@ -6,12 +6,13 @@ import com.wafflestudio.spring2025.comment.model.Comment
 import com.wafflestudio.spring2025.comment.repository.CommentRepository
 import com.wafflestudio.spring2025.common.enum.Semester
 import com.wafflestudio.spring2025.course.crawling.ClassPlaceAndTime
-import com.wafflestudio.spring2025.course.crawling.DayOfWeek
 import com.wafflestudio.spring2025.course.model.Course
 import com.wafflestudio.spring2025.course.repository.CourseRepository
 import com.wafflestudio.spring2025.post.model.Post
 import com.wafflestudio.spring2025.post.repository.PostRepository
+import com.wafflestudio.spring2025.timetable.model.Enroll
 import com.wafflestudio.spring2025.timetable.model.Timetable
+import com.wafflestudio.spring2025.timetable.repository.EnrollRepository
 import com.wafflestudio.spring2025.timetable.repository.TimetableRepository
 import com.wafflestudio.spring2025.user.JwtTokenProvider
 import com.wafflestudio.spring2025.user.model.User
@@ -28,6 +29,7 @@ class DataGenerator(
     private val commentRepository: CommentRepository,
     private val timetableRepository: TimetableRepository,
     private val courseRepository: CourseRepository,
+    private val enrollRepository: EnrollRepository,
     private val jwtTokenProvider: JwtTokenProvider,
 ) {
     fun generateUser(
@@ -37,8 +39,8 @@ class DataGenerator(
         val user =
             userRepository.save(
                 User(
-                    username = username ?: "user-${Random.Default.nextInt(1000000)}",
-                    password = BCrypt.hashpw(password ?: "password-${Random.Default.nextInt(1000000)}", BCrypt.gensalt()),
+                    username = username ?: "user-${Random.nextInt(1000000)}",
+                    password = BCrypt.hashpw(password ?: "password-${Random.nextInt(1000000)}", BCrypt.gensalt()),
                 ),
             )
         return user to jwtTokenProvider.createToken(user.username)
@@ -48,7 +50,7 @@ class DataGenerator(
         val board =
             boardRepository.save(
                 Board(
-                    name = name ?: "board-${Random.Default.nextInt(1000000)}",
+                    name = name ?: "board-${Random.nextInt(1000000)}",
                 ),
             )
         return board
@@ -63,8 +65,8 @@ class DataGenerator(
         val post =
             postRepository.save(
                 Post(
-                    title = title ?: "title-${Random.Default.nextInt(1000000)}",
-                    content = content ?: "content-${Random.Default.nextInt(1000000)}",
+                    title = title ?: "title-${Random.nextInt(1000000)}",
+                    content = content ?: "content-${Random.nextInt(1000000)}",
                     userId = (user ?: generateUser().first).id!!,
                     boardId = (board ?: generateBoard()).id!!,
                 ),
@@ -80,7 +82,7 @@ class DataGenerator(
         val comment =
             commentRepository.save(
                 Comment(
-                    content = content ?: "content-${Random.Default.nextInt(1000000)}",
+                    content = content ?: "content-${Random.nextInt(1000000)}",
                     userId = (user ?: generateUser().first).id!!,
                     postId = (post ?: generatePost()).id!!,
                 ),
@@ -98,7 +100,7 @@ class DataGenerator(
             timetableRepository.save(
                 Timetable(
                     userId = (user ?: generateUser().first).id!!,
-                    name = name ?: "timetable-${Random.Default.nextInt(1000000)}",
+                    name = name ?: "timetable-${Random.nextInt(1000000)}",
                     year = year ?: 2025,
                     semester = semester ?: Semester.FALL,
                 ),
@@ -126,28 +128,33 @@ class DataGenerator(
                 Course(
                     year = year ?: 2025,
                     semester = semester ?: Semester.FALL,
-                    classification = classification ?: "전공필수",
-                    college = college ?: "공과대학",
-                    department = department ?: "컴퓨터공학부",
-                    academicCourse = academicCourse ?: "학사",
-                    academicYear = academicYear ?: "1학년",
-                    courseNumber = courseNumber ?: "M1522.${Random.Default.nextInt(100000, 999999)}",
-                    lectureNumber = lectureNumber ?: "00${Random.Default.nextInt(1, 9)}",
-                    courseTitle = courseTitle ?: "강의-${Random.Default.nextInt(1000000)}",
-                    credit = credit ?: 3L,
-                    instructor = instructor ?: "교수-${Random.Default.nextInt(1000)}",
-                    classTimeJson =
-                        classTimeJson
-                            ?: listOf(
-                                ClassPlaceAndTime(
-                                    day = DayOfWeek.MONDAY,
-                                    place = "301-101",
-                                    startMinute = 540,
-                                    endMinute = 630,
-                                ),
-                            ),
+                    classification = classification,
+                    college = college,
+                    department = department,
+                    academicCourse = academicCourse,
+                    academicYear = academicYear,
+                    courseNumber = courseNumber ?: "L0000-${Random.nextInt(10000)}",
+                    lectureNumber = lectureNumber ?: "001",
+                    courseTitle = courseTitle ?: "강의-${Random.nextInt(1000000)}",
+                    credit = credit ?: 3,
+                    instructor = instructor,
+                    classTimeJson = classTimeJson,
                 ),
             )
         return course
+    }
+
+    fun generateEnroll(
+        timetable: Timetable,
+        course: Course,
+    ): Enroll {
+        val enroll =
+            enrollRepository.save(
+                Enroll(
+                    timetableId = timetable.id!!,
+                    courseId = course.id!!,
+                ),
+            )
+        return enroll
     }
 }
