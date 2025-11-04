@@ -30,41 +30,41 @@ class CourseFetchServiceImpl(
         year: Int,
         semester: Semester,
     ): Int {
-            val courses = getCourses(year, semester)
+        val courses = getCourses(year, semester)
 
-            courseRepository.saveAll(courses)
-            return courses.size
+        courseRepository.saveAll(courses)
+        return courses.size
     }
 
     private suspend fun getCourses(
         year: Int,
         semester: Semester,
     ): List<Course> {
-            val koreanLectureXlsx = courseFetchRepository.downloadCoursesExcel(year, semester, "ko")
-            val englishLectureXlsx = courseFetchRepository.downloadCoursesExcel(year, semester, "en")
+        val koreanLectureXlsx = courseFetchRepository.downloadCoursesExcel(year, semester, "ko")
+        val englishLectureXlsx = courseFetchRepository.downloadCoursesExcel(year, semester, "en")
 
-            val koreanSheet = HSSFWorkbook(koreanLectureXlsx.asInputStream()).getSheetAt(0)
-            val englishSheet = HSSFWorkbook(englishLectureXlsx.asInputStream()).getSheetAt(0)
-            val fullSheet =
-                koreanSheet.zip(englishSheet).map { (koreanRow, englishRow) ->
-                    koreanRow + englishRow
+        val koreanSheet = HSSFWorkbook(koreanLectureXlsx.asInputStream()).getSheetAt(0)
+        val englishSheet = HSSFWorkbook(englishLectureXlsx.asInputStream()).getSheetAt(0)
+        val fullSheet =
+            koreanSheet.zip(englishSheet).map { (koreanRow, englishRow) ->
+                koreanRow + englishRow
+            }
+
+        val columnNameIndex = fullSheet[2].associate { it.stringCellValue to it.columnIndex }
+
+        return fullSheet
+            .drop(3)
+            .map { row ->
+                convertRowToCourse(row, columnNameIndex, year, semester)
+            }.also {
+                koreanLectureXlsx.release()
+                englishLectureXlsx.release()
+            }.mapIndexed { index, course ->
+                // 4. 추가 정보 API 호출하여 보완 (진행상황 로깅)
+                if (index % 100 == 0) {
                 }
-
-            val columnNameIndex = fullSheet[2].associate { it.stringCellValue to it.columnIndex }
-
-            return fullSheet
-                .drop(3)
-                .map { row ->
-                    convertRowToCourse(row, columnNameIndex, year, semester)
-                }.also {
-                    koreanLectureXlsx.release()
-                    englishLectureXlsx.release()
-                }.mapIndexed { index, course ->
-                    // 4. 추가 정보 API 호출하여 보완 (진행상황 로깅)
-                    if (index % 100 == 0) {
-                    }
-                    enrichCourseWithApiData(course, year, semester)
-                }
+                enrichCourseWithApiData(course, year, semester)
+            }
     }
 
     private fun convertRowToCourse(

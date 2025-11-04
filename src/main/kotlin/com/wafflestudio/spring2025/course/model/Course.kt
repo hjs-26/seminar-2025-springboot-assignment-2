@@ -34,10 +34,15 @@ data class Course(
 
     var classTimeJson: List<ClassPlaceAndTime>?
         @Transient
-        get() = classTimeJsonString?.let {
-            if (it.isBlank()) null
-            else objectMapper.readValue(it)
-        }
+        get() =
+            classTimeJsonString?.let {
+                if (it.isBlank()) {
+                    null
+                } else {
+                    objectMapper.readValue(it)
+                }
+            }
+
         @Transient
         set(value) {
             classTimeJsonString = value?.let { objectMapper.writeValueAsString(it) }
