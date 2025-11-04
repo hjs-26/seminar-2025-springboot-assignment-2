@@ -543,19 +543,6 @@ class TimetableIntegrationTest
                 ).andExpect(status().isNotFound)
         }
 
-        // ========== 강의 검색 (Course 패키지 담당 - 최연서 & 손현준) ==========
-        @Test
-        @Disabled("강의 검색 기능 구현 후 테스트")
-        fun `should search for courses`() {
-            // 강의를 검색할 수 있다
-        }
-
-        @Test
-        @Disabled("강의 검색은 course 패키지에서 담당")
-        fun `should paginate correctly when searching for courses`() {
-            // 강의 검색 시, 페이지네이션이 올바르게 동작한다
-        }
-
         // Course 검색 테스트 ====================================================
 
         @Test

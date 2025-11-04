@@ -8,6 +8,7 @@ import com.wafflestudio.spring2025.course.dto.core.CourseDto
 import com.wafflestudio.spring2025.course.repository.CourseRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class CourseService(
@@ -20,7 +21,8 @@ class CourseService(
         nextId: Long?,
         limit: Int,
     ): CourseSearchResponse {
-        if (year != 2025 || semester != Semester.SUMMER) {
+        val currentYear = LocalDate.now().year
+        if (year !in 2013..currentYear) {
             throw IllegalPeriodException()
         }
         val queryLimit = limit + 1
