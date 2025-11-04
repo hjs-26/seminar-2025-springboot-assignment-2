@@ -62,7 +62,7 @@ class PostIntegrationTest
                         .header("Authorization", "Bearer $token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(request)),
-                ).andExpect(status().isOk)
+                ).andExpect(status().isCreated)
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.title").value(request["title"]))
                 .andExpect(jsonPath("$.content").value(request["content"]))
