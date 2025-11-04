@@ -6,6 +6,7 @@ import com.wafflestudio.spring2025.course.crawling.ClassPlaceAndTime
 import com.wafflestudio.spring2025.course.crawling.DayOfWeek
 import com.wafflestudio.spring2025.course.dto.CourseSearchResponse
 import com.wafflestudio.spring2025.helper.DataGenerator
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,6 +34,11 @@ class TimetableIntegrationTest
         private val mapper: ObjectMapper,
         private val dataGenerator: DataGenerator,
     ) {
+        @BeforeEach
+        fun setUp() {
+            dataGenerator.cleanupCourses()
+        }
+
         // ========== 시간표 생성 테스트 ==========
         @Test
         fun `should create a timetable`() {

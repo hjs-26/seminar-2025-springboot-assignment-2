@@ -144,6 +144,10 @@ class DataGenerator(
         return course
     }
 
+    fun cleanupCourses() {
+        courseRepository.deleteAll()
+    }
+
     fun generateEnroll(
         timetable: Timetable,
         course: Course,
