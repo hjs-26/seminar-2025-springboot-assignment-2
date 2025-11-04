@@ -2,6 +2,8 @@ package com.wafflestudio.spring2025.timetable.controller
 
 import com.wafflestudio.spring2025.timetable.dto.request.CreateTimetableRequest
 import com.wafflestudio.spring2025.timetable.dto.request.UpdateTimetableRequest
+import com.wafflestudio.spring2025.timetable.dto.response.AddCourseResponse
+import com.wafflestudio.spring2025.timetable.dto.response.TimetableDetailResponse
 import com.wafflestudio.spring2025.timetable.dto.response.TimetableListResponse
 import com.wafflestudio.spring2025.timetable.dto.response.TimetableResponse
 import com.wafflestudio.spring2025.timetable.service.TimetableService
@@ -110,6 +112,74 @@ class TimetableController(
         timetableService.delete(
             user = user,
             timetableId = timetableId,
+        )
+        return ResponseEntity.noContent().build()
+    }
+
+    @Operation(summary = "시간표 상세 조회", description = "특정 시간표의 기본 정보와 포함된 모든 강의의 상세 정보 및 학점 수 합을 조회합니다")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "시간표 상세 조회 성공"),
+            ApiResponse(responseCode = "404", description = "시간표를 찾지 못함"),
+        ],
+    )
+    @GetMapping("/timetables/{timetableId}")
+    fun getDetail(
+        @Parameter(hidden = true) @LoggedInUser user: User,
+        @Parameter @PathVariable timetableId: Long,
+    ): ResponseEntity<TimetableDetailResponse> {
+        val timetableDetailResponse =
+            timetableService.getDetail(
+                timetableId = timetableId,
+            )
+        return ResponseEntity.ok(timetableDetailResponse)
+    }
+
+    @Operation(summary = "시간표에 강의 추가", description = "유저가 생성한 시간표에 강의를 추가합니다")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "시간표에 강의 추가 성공"),
+            ApiResponse(responseCode = "400", description = "시간표와 강의의 년도와 학기가 맞지 않음"),
+            ApiResponse(responseCode = "403", description = "다른 유저의 시간표에 강의 추가 시도"),
+            ApiResponse(responseCode = "404", description = "시간표나 강의를 찾지 못함"),
+            ApiResponse(responseCode = "409", description = "시간표에 이미 추가된 강의이거나 기존 강의와 시간이 겹침"),
+            ApiResponse(responseCode = "503", description = "강의 시간 정보가 아직 등록되지 않음"),
+        ],
+    )
+    @PostMapping("/timetables/{timetableId}/courses/{courseId}")
+    fun addCourse(
+        @Parameter(hidden = true) @LoggedInUser user: User,
+        @Parameter @PathVariable timetableId: Long,
+        @Parameter @PathVariable courseId: Long,
+    ): ResponseEntity<AddCourseResponse> {
+        val addCourseResponse =
+            timetableService.addCourse(
+                user = user,
+                timetableId = timetableId,
+                courseId = courseId,
+            )
+        return ResponseEntity.ok(addCourseResponse)
+    }
+
+    @Operation(summary = "시간표에서 강의 삭제", description = "유저가 생성한 시간표에서 추가된 강의를 삭제합니다")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "204", description = "시간표에서 강의 삭제 성공"),
+            ApiResponse(responseCode = "400", description = "시간표에 삭제할 강의가 없음"),
+            ApiResponse(responseCode = "403", description = "다른 유저의 시간표에서 강의 삭제 시도"),
+            ApiResponse(responseCode = "404", description = "시간표를 찾지 못함"),
+        ],
+    )
+    @DeleteMapping("/timetables/{timetableId}/courses/{courseId}")
+    fun deleteCourse(
+        @Parameter(hidden = true) @LoggedInUser user: User,
+        @Parameter @PathVariable timetableId: Long,
+        @Parameter @PathVariable courseId: Long,
+    ): ResponseEntity<Unit> {
+        timetableService.deleteCourse(
+            user = user,
+            timetableId = timetableId,
+            courseId = courseId,
         )
         return ResponseEntity.noContent().build()
     }

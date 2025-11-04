@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import kotlin.collections.emptyList
 
 @Table("courses")
 data class Course(
@@ -35,9 +36,11 @@ data class Course(
     var classTimeJson: List<ClassPlaceAndTime>?
         @Transient
         get() =
+            // 정보가 아예 없으면 null이 됨
+            // 수업 시간 정보가 필요 없다는 정보가 있으면 빈 리스트가 됨
             classTimeJsonString?.let {
                 if (it.isBlank()) {
-                    null
+                    emptyList()
                 } else {
                     objectMapper.readValue(it)
                 }
