@@ -19,6 +19,7 @@ import com.wafflestudio.spring2025.user.model.User
 import com.wafflestudio.spring2025.user.repository.UserRepository
 import org.mindrot.jbcrypt.BCrypt
 import org.springframework.stereotype.Component
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.random.Random
 
 @Component
@@ -108,6 +109,10 @@ class DataGenerator(
         return timetable
     }
 
+    companion object {
+        private val idCounter = AtomicLong(1L)
+    }
+
     fun generateCourse(
         year: Int? = null,
         semester: Semester? = null,
@@ -123,6 +128,7 @@ class DataGenerator(
         instructor: String? = null,
         classTimeJson: List<ClassPlaceAndTime>? = null,
     ): Course {
+        val nextId = idCounter.getAndIncrement()
         val course =
             courseRepository.save(
                 Course(
@@ -133,9 +139,9 @@ class DataGenerator(
                     department = department,
                     academicCourse = academicCourse,
                     academicYear = academicYear,
-                    courseNumber = courseNumber ?: "L0000-${Random.nextInt(10000)}",
+                    courseNumber = courseNumber ?: "L0000-$nextId",
                     lectureNumber = lectureNumber ?: "001",
-                    courseTitle = courseTitle ?: "강의-${Random.nextInt(1000000)}",
+                    courseTitle = courseTitle ?: "강의-$nextId",
                     credit = credit ?: 3L,
                     instructor = instructor,
                     classTimeJson = classTimeJson,
