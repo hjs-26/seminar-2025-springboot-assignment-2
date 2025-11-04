@@ -46,8 +46,9 @@ class CourseService(
     }
 
     fun getById(id: Long): CourseDto {
-        val course = courseRepository.findByIdOrNull(id)
-            ?: throw CourseNotFoundException()
+        val course =
+            courseRepository.findByIdOrNull(id)
+                ?: throw CourseNotFoundException()
         return CourseDto(course)
     }
 }

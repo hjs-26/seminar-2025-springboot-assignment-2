@@ -2,9 +2,9 @@ package com.wafflestudio.spring2025
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.wafflestudio.spring2025.common.enum.Semester
-import com.wafflestudio.spring2025.course.dto.CourseSearchResponse
 import com.wafflestudio.spring2025.course.crawling.ClassPlaceAndTime
 import com.wafflestudio.spring2025.course.crawling.DayOfWeek
+import com.wafflestudio.spring2025.course.dto.CourseSearchResponse
 import com.wafflestudio.spring2025.helper.DataGenerator
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -709,7 +709,10 @@ class TimetableIntegrationTest
         fun `should return error for invalid year`() {
             // 유효하지 않은 연도는 검색할 수 없다 (2013년 이전, 미래 연도)
             val (_, token) = dataGenerator.generateUser()
-            val futureYear = java.time.LocalDate.now().year + 1
+            val futureYear =
+                java.time.LocalDate
+                    .now()
+                    .year + 1
 
             // 2012년 (2013년 이전)
             mvc
