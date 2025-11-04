@@ -1,13 +1,27 @@
 package com.wafflestudio.spring2025.timetable.service
 
 import com.wafflestudio.spring2025.common.enum.Semester
+import com.wafflestudio.spring2025.course.CourseNotFoundException
+import com.wafflestudio.spring2025.course.crawling.ClassPlaceAndTime
+import com.wafflestudio.spring2025.course.dto.core.CourseDto
+import com.wafflestudio.spring2025.course.model.Course
+import com.wafflestudio.spring2025.course.repository.CourseRepository
+import com.wafflestudio.spring2025.timetable.CourseDuplicateException
+import com.wafflestudio.spring2025.timetable.CourseNotExistsInTimetableException
+import com.wafflestudio.spring2025.timetable.CourseOverlapException
+import com.wafflestudio.spring2025.timetable.CourseTimeNotAvailableException
+import com.wafflestudio.spring2025.timetable.CourseTimetableNotMatchException
 import com.wafflestudio.spring2025.timetable.TimetableDuplicateException
 import com.wafflestudio.spring2025.timetable.TimetableInvalidYearException
 import com.wafflestudio.spring2025.timetable.TimetableModifyForbiddenException
 import com.wafflestudio.spring2025.timetable.TimetableNameBlankException
 import com.wafflestudio.spring2025.timetable.TimetableNotFoundException
 import com.wafflestudio.spring2025.timetable.dto.core.TimetableDto
+import com.wafflestudio.spring2025.timetable.dto.response.AddCourseResponse
+import com.wafflestudio.spring2025.timetable.dto.response.TimetableDetailResponse
+import com.wafflestudio.spring2025.timetable.model.Enroll
 import com.wafflestudio.spring2025.timetable.model.Timetable
+import com.wafflestudio.spring2025.timetable.repository.EnrollRepository
 import com.wafflestudio.spring2025.timetable.repository.TimetableRepository
 import com.wafflestudio.spring2025.user.model.User
 import org.springframework.stereotype.Service
@@ -17,6 +31,8 @@ import kotlin.jvm.optionals.getOrNull
 @Service
 class TimetableService(
     private val timetableRepository: TimetableRepository,
+    private val courseRepository: CourseRepository,
+    private val enrollRepository: EnrollRepository,
 ) {
     fun create(
         user: User,
@@ -71,23 +87,21 @@ class TimetableService(
         if (name.isBlank()) {
             throw TimetableNameBlankException()
         }
-        if (timetableRepository.existsByUserIdAndYearAndSemesterAndName(user.id!!, timetable.year, timetable.semester, name)) {
+        if (timetableRepository.existsByUserIdAndYearAndSemesterAndName(
+                user.id!!,
+                timetable.year,
+                timetable.semester,
+                name,
+            )
+        ) {
             throw TimetableDuplicateException()
         }
 
         // Update timetable name
-        val newTimetable =
-            timetableRepository.save(
-                Timetable(
-                    id = timetableId,
-                    userId = user.id!!,
-                    name = name,
-                    year = timetable.year,
-                    semester = timetable.semester,
-                ),
-            )
+        timetable.name = name
+        val updatedTimetable = timetableRepository.save(timetable)
 
-        return TimetableDto(newTimetable)
+        return TimetableDto(updatedTimetable)
     }
 
     fun delete(
@@ -105,4 +119,109 @@ class TimetableService(
         // Delete timetable
         timetableRepository.delete(timetable)
     }
+
+    fun getDetail(timetableId: Long): TimetableDetailResponse {
+        // Exceptions
+        val timetable =
+            timetableRepository.findById(timetableId).getOrNull()
+                ?: throw TimetableNotFoundException()
+
+        // Get timetable detail response
+        val courses = courseRepository.findByTimetableId(timetableId)
+        val credits = courses.sumOf { it.credit }
+
+        return TimetableDetailResponse(
+            timetable = TimetableDto(timetable),
+            courses = courses.map { CourseDto(it) },
+            credits = credits,
+        )
+    }
+
+    fun addCourse(
+        user: User,
+        timetableId: Long,
+        courseId: Long,
+    ): AddCourseResponse {
+        // Exceptions
+        val timetable =
+            timetableRepository.findById(timetableId).getOrNull()
+                ?: throw TimetableNotFoundException()
+        if (user.id != timetable.userId) {
+            throw TimetableModifyForbiddenException()
+        }
+        val newCourse =
+            courseRepository.findById(courseId).getOrNull()
+                ?: throw CourseNotFoundException()
+        if (newCourse.year != timetable.year || newCourse.semester != timetable.semester) {
+            throw CourseTimetableNotMatchException()
+        }
+        if (enrollRepository.existsByTimetableIdAndCourseId(timetableId, courseId)) {
+            throw CourseDuplicateException()
+        }
+
+        // Check if course time overlaps with existing courses
+        val existingCourses = courseRepository.findByTimetableId(timetableId)
+        validateTimeConflict(newCourse, existingCourses)
+
+        // Add course to timetable
+        enrollRepository.save(
+            Enroll(
+                timetableId = timetableId,
+                courseId = courseId,
+            ),
+        )
+
+        return CourseDto(newCourse)
+    }
+
+    fun deleteCourse(
+        user: User,
+        timetableId: Long,
+        courseId: Long,
+    ) {
+        // Exceptions
+        val timetable =
+            timetableRepository.findById(timetableId).getOrNull()
+                ?: throw TimetableNotFoundException()
+        if (user.id != timetable.userId) {
+            throw TimetableModifyForbiddenException()
+        }
+        if (!enrollRepository.existsByTimetableIdAndCourseId(timetableId, courseId)) {
+            throw CourseNotExistsInTimetableException()
+        }
+
+        // Delete course from timetable
+        enrollRepository.deleteByTimetableIdAndCourseId(timetableId, courseId)
+    }
+
+    private fun validateTimeConflict(
+        newCourse: Course,
+        existingCourses: List<Course>,
+    ) {
+        val newCourseTimes =
+            newCourse.classTimeJson
+                ?: throw CourseTimeNotAvailableException()
+
+        for (existingCourse in existingCourses) {
+            val existingCourseTimes =
+                existingCourse.classTimeJson
+                    ?: throw CourseTimeNotAvailableException()
+
+            for (newTime in newCourseTimes) {
+                for (existingTime in existingCourseTimes) {
+                    if (isTimeOverlap(newTime, existingTime)) {
+                        throw CourseOverlapException()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun isTimeOverlap(
+        time1: ClassPlaceAndTime,
+        time2: ClassPlaceAndTime,
+    ): Boolean =
+        time1.day == time2.day &&
+            time1.endMinute > time2.startMinute &&
+            time2.endMinute > time1.startMinute
 }
