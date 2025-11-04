@@ -78,7 +78,7 @@ class CommentIntegrationTest
                         .header("Authorization", "Bearer $token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(request)),
-                ).andExpect(status().isOk)
+                ).andExpect(status().isCreated)
                 .andExpect(jsonPath("$.content").value(request.content))
         }
 

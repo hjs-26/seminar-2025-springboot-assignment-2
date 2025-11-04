@@ -39,9 +39,7 @@ class AuthIntegrationTest
                     post("/api/v1/auth/register")
                         .content(mapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON),
-                ).andExpect(
-                    status().`is`(200),
-                )
+                ).andExpect(status().isCreated)
         }
 
         @Test
@@ -84,7 +82,7 @@ class AuthIntegrationTest
                     post("/api/v1/auth/login")
                         .content(mapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON),
-                ).andExpect(status().isOk)
+                ).andExpect(status().isCreated)
         }
 
         @Test

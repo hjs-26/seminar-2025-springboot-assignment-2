@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -39,8 +38,8 @@ class CourseFetchIntegrationTest
             courseRepository.deleteAll()
         }
 
+        // @Disabled("실제 서울대 사이트를 호출하므로 수동으로 실행")
         @Test
-        @Disabled("실제 서울대 사이트를 호출하므로 수동으로 실행")
         fun `should fetch and save courses from SNU course registration site`() {
             // 서울대 수강신청 사이트에서 강의 정보를 크롤링하여 DB에 저장할 수 있다
             val (_, token) = dataGenerator.generateUser()
@@ -107,8 +106,8 @@ class CourseFetchIntegrationTest
             }
         }
 
+        // @Disabled("실제 서울대 사이트를 호출하므로 수동으로 실행")
         @Test
-        @Disabled("실제 서울대 사이트를 호출하므로 수동으로 실행")
         fun `should parse excel data correctly and save to database`() {
             // 엑셀 데이터를 올바르게 파싱하여 DB에 저장한다
             val (_, token) = dataGenerator.generateUser()
@@ -139,8 +138,8 @@ class CourseFetchIntegrationTest
             println("Instructor: ${course.instructor}")
         }
 
+        // @Disabled("실제 서울대 사이트를 호출하므로 수동으로 실행")
         @Test
-        @Disabled("실제 서울대 사이트를 호출하므로 수동으로 실행")
         fun `should handle all four semester types correctly`() {
             // 4가지 학기 타입(SPRING, SUMMER, FALL, WINTER)을 모두 올바르게 처리한다
             val (_, token) = dataGenerator.generateUser()
@@ -167,8 +166,8 @@ class CourseFetchIntegrationTest
             }
         }
 
+        // @Disabled("실제 서울대 사이트를 호출하므로 수동으로 실행")
         @Test
-        @Disabled("실제 서울대 사이트를 호출하므로 수동으로 실행")
         fun `should enrich course data with API information`() {
             // API 호출을 통해 추가 정보로 강의 데이터를 보완한다
             val (_, token) = dataGenerator.generateUser()
@@ -192,8 +191,8 @@ class CourseFetchIntegrationTest
             }
         }
 
+        // @Disabled("실제 서울대 사이트를 호출하므로 수동으로 실행")
         @Test
-        @Disabled("실제 서울대 사이트를 호출하므로 수동으로 실행")
         fun `should handle missing columns in excel gracefully`() {
             // 엑셀에서 컬럼이 누락된 경우 적절히 처리한다
             val (_, token) = dataGenerator.generateUser()
