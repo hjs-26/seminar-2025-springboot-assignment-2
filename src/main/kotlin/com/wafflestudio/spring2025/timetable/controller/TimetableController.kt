@@ -125,6 +125,7 @@ class TimetableController(
     )
     @GetMapping("/timetables/{timetableId}")
     fun getDetail(
+        @Parameter(hidden = true) @LoggedInUser user: User,
         @Parameter @PathVariable timetableId: Long,
     ): ResponseEntity<TimetableDetailResponse> {
         val timetableDetailResponse =

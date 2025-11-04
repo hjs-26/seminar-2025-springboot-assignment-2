@@ -159,7 +159,8 @@ class TimetableIntegrationTest
 
             mvc
                 .perform(
-                    get("/api/v1/timetables/${timetable.id}"),
+                    get("/api/v1/timetables/${timetable.id}")
+                        .header("Authorization", "Bearer $token"),
                 ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.timetable.id").value(timetable.id!!))
                 .andExpect(jsonPath("$.timetable.name").value("2025-2 시간표"))
@@ -174,7 +175,8 @@ class TimetableIntegrationTest
 
             mvc
                 .perform(
-                    get("/api/v1/timetables/999999"),
+                    get("/api/v1/timetables/999999")
+                        .header("Authorization", "Bearer $token"),
                 ).andExpect(status().isNotFound)
         }
 
@@ -194,7 +196,8 @@ class TimetableIntegrationTest
 
             mvc
                 .perform(
-                    get("/api/v1/timetables/${timetable.id}"),
+                    get("/api/v1/timetables/${timetable.id}")
+                        .header("Authorization", "Bearer $token"),
                 ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.courses.length()").value(3))
                 .andExpect(jsonPath("$.credits").value(10)) // 3 + 3 + 4 = 10

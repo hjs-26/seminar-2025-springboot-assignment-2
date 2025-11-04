@@ -98,18 +98,10 @@ class TimetableService(
         }
 
         // Update timetable name
-        val newTimetable =
-            timetableRepository.save(
-                Timetable(
-                    id = timetableId,
-                    userId = user.id!!,
-                    name = name,
-                    year = timetable.year,
-                    semester = timetable.semester,
-                ),
-            )
+        timetable.name = name
+        val updatedTimetable = timetableRepository.save(timetable)
 
-        return TimetableDto(newTimetable)
+        return TimetableDto(updatedTimetable)
     }
 
     fun delete(
