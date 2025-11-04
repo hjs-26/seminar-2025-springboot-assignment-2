@@ -24,3 +24,10 @@ class IllegalPeriodException :
         httpStatusCode = HttpStatus.BAD_REQUEST,
         msg = "Search for Illegal period",
     )
+
+class InvalidSemesterFormatException :
+    CourseException(
+        errorCode = 0,
+        httpStatusCode = HttpStatus.BAD_REQUEST,
+        msg = "semester must be YYYY-1, YYYY-2, YYYY-3, or YYYY-4 format",
+    )
