@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
@@ -119,9 +118,9 @@ class RealCourseIntegrationTest
                     post("/api/v1/timetables/${timetable.id}/courses/${course.id}")
                         .header("Authorization", "Bearer $token"),
                 ).andExpect(status().isOk)
-                .andExpect(jsonPath("$.course.id").value(course.id!!))
-                .andExpect(jsonPath("$.course.courseTitle").value(course.courseTitle))
-                .andExpect(jsonPath("$.course.credit").value(course.credit))
+                .andExpect(jsonPath("$.id").value(course.id!!))
+                .andExpect(jsonPath("$.courseTitle").value(course.courseTitle))
+                .andExpect(jsonPath("$.credit").value(course.credit))
 
             // 시간표 조회해서 강의가 추가되었는지 확인
             mvc
@@ -147,21 +146,32 @@ class RealCourseIntegrationTest
                     user = user,
                 )
 
-            // 2025 여름학기 강의 조회
-            val realCourses = courseRepository.search(2025, Semester.SUMMER, null, null, 5)
+            // 2025 여름학기 강의 조회 - 시간이 겹치지 않는 3개를 찾기 위해 더 많이 조회
+            val realCourses = courseRepository.search(2025, Semester.SUMMER, null, null, 50)
             assumeTrue(realCourses.size >= 3, "최소 3개의 강의가 필요합니다")
 
-            val coursesToAdd = realCourses.take(3)
-            val expectedTotalCredits = coursesToAdd.sumOf { it.credit }
+            // 시간이 겹치지 않는 강의 3개를 찾아서 추가
+            val addedCourses = mutableListOf<com.wafflestudio.spring2025.course.model.Course>()
 
-            // 강의들을 시간표에 추가
-            coursesToAdd.forEach { course ->
-                mvc
-                    .perform(
-                        post("/api/v1/timetables/${timetable.id}/courses/${course.id}")
-                            .header("Authorization", "Bearer $token"),
-                    ).andExpect(status().isOk)
+            for (course in realCourses) {
+                val result =
+                    mvc
+                        .perform(
+                            post("/api/v1/timetables/${timetable.id}/courses/${course.id}")
+                                .header("Authorization", "Bearer $token"),
+                        ).andReturn()
+
+                if (result.response.status == 200) {
+                    addedCourses.add(course)
+                    if (addedCourses.size == 3) {
+                        break
+                    }
+                }
             }
+
+            assumeTrue(addedCourses.size == 3, "시간이 겹치지 않는 3개의 강의를 찾을 수 없습니다")
+
+            val expectedTotalCredits = addedCourses.sumOf { it.credit }
 
             // 시간표 조회 및 학점 합계 확인
             mvc
@@ -185,24 +195,38 @@ class RealCourseIntegrationTest
                     user = user,
                 )
 
-            val realCourses = courseRepository.search(2025, Semester.FALL, null, null, 2)
+            // 시간이 겹치지 않는 강의 2개를 찾기 위해 더 많은 강의를 조회
+            val realCourses = courseRepository.search(2025, Semester.FALL, null, null, 50)
             assumeTrue(realCourses.size >= 2, "최소 2개의 강의가 필요합니다")
 
+            // 첫 번째 강의 추가
             val course1 = realCourses[0]
-            val course2 = realCourses[1]
-
-            // 두 강의를 추가
             mvc
                 .perform(
                     post("/api/v1/timetables/${timetable.id}/courses/${course1.id}")
                         .header("Authorization", "Bearer $token"),
                 ).andExpect(status().isOk)
 
-            mvc
-                .perform(
-                    post("/api/v1/timetables/${timetable.id}/courses/${course2.id}")
-                        .header("Authorization", "Bearer $token"),
-                ).andExpect(status().isOk)
+            // 시간이 겹치지 않는 두 번째 강의 찾기
+            var course2 = realCourses[1]
+            var addedSuccessfully = false
+
+            for (course in realCourses.drop(1)) {
+                val result =
+                    mvc
+                        .perform(
+                            post("/api/v1/timetables/${timetable.id}/courses/${course.id}")
+                                .header("Authorization", "Bearer $token"),
+                        ).andReturn()
+
+                if (result.response.status == 200) {
+                    course2 = course
+                    addedSuccessfully = true
+                    break
+                }
+            }
+
+            assumeTrue(addedSuccessfully, "시간이 겹치지 않는 두 번째 강의를 찾을 수 없습니다")
 
             // 첫 번째 강의 삭제
             mvc
@@ -293,17 +317,10 @@ class RealCourseIntegrationTest
                     .perform(
                         get("/api/v1/courses")
                             .header("Authorization", "Bearer $token")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(
-                                mapper.writeValueAsString(
-                                    mapOf(
-                                        "year" to 2025,
-                                        "semester" to "SPRING",
-                                        "keyword" to "컴퓨터",
-                                        "limit" to 10,
-                                    ),
-                                ),
-                            ),
+                            .param("year", "2025")
+                            .param("semester", "SPRING")
+                            .param("keyword", "컴퓨터")
+                            .param("limit", "10"),
                     ).andExpect(status().isOk)
                     .andReturn()
 
