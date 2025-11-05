@@ -25,7 +25,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 
 /**
  * 실제 크롤링된 Course 데이터를 활용한 통합 테스트
- * 각 테스트 전에 크롤링을 수행하여 데이터를 준비합니다.
+ * 첫 테스트 실행 시 한 번만 크롤링을 수행하고, 이후 테스트에서는 같은 데이터를 재사용합니다.
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -39,12 +39,20 @@ class RealCourseIntegrationTest
         private val courseRepository: CourseRepository,
         private val dataGenerator: DataGenerator,
     ) {
+        companion object {
+            // 크롤링이 이미 수행되었는지 추적하는 플래그
+            private var isCrawled = false
+        }
+
         @BeforeEach
         fun setupCrawledData() {
+            // 이미 크롤링이 수행되었으면 스킵
+            if (isCrawled) {
+                return
+            }
+
             // 각 테스트 전에 course 데이터 정리하여 중복 키 에러 방지
             dataGenerator.cleanupCourses()
-
-            println("크롤링을 시작합니다...")
 
             // 테스트용 사용자 생성
             val (_, token) = dataGenerator.generateUser()
@@ -53,7 +61,6 @@ class RealCourseIntegrationTest
             val semesters = listOf("2025-1", "2025-2", "2025-3", "2025-4")
 
             semesters.forEach { semester ->
-                println("$semester 학기 크롤링 중...")
                 mvc
                     .perform(
                         post("/api/v1/courses/fetch")
@@ -61,14 +68,15 @@ class RealCourseIntegrationTest
                             .param("semester", semester),
                     ).andExpect(status().isOk)
 
-                println("$semester 학기 크롤링 완료")
             }
 
-            println("크롤링 완료. 총 ${courseRepository.count()}개의 강의가 저장되었습니다.")
 
             // 크롤링된 데이터가 있는지 최종 확인
             val finalCourseCount = courseRepository.count()
             assumeTrue(finalCourseCount > 0, "크롤링된 강의 데이터가 DB에 있어야 합니다")
+
+            // 크롤링 완료 플래그 설정
+            isCrawled = true
         }
 
         @Test
@@ -253,7 +261,6 @@ class RealCourseIntegrationTest
                 assertEquals(2025, course.year, "연도가 2025여야 합니다")
                 assertEquals(Semester.SPRING, course.semester, "학기가 SPRING이어야 합니다")
 
-                println("✅ ${course.courseTitle} (${course.courseNumber}-${course.lectureNumber}): ${course.credit}학점")
             }
         }
 
@@ -265,16 +272,6 @@ class RealCourseIntegrationTest
 
             // 학과별로 그룹화
             val coursesByDepartment = allCourses.groupBy { it.department }
-
-            println("\n=== 학과별 강의 수 ===")
-            coursesByDepartment
-                .filter { it.key != null && it.value.size >= 3 }
-                .forEach { (department, courses) ->
-                    println("$department: ${courses.size}개 강의")
-                    courses.take(3).forEach { course ->
-                        println("  - ${course.courseTitle} (${course.credit}학점)")
-                    }
-                }
 
             assertTrue(coursesByDepartment.isNotEmpty(), "최소 한 개 이상의 학과가 있어야 합니다")
         }
@@ -291,18 +288,6 @@ class RealCourseIntegrationTest
 
             // 교수님별로 그룹화
             val coursesByInstructor = coursesWithInstructor.groupBy { it.instructor }
-
-            println("\n=== 교수님별 강의 수 (상위 10명) ===")
-            coursesByInstructor
-                .toList()
-                .sortedByDescending { it.second.size }
-                .take(10)
-                .forEach { (instructor, courses) ->
-                    println("$instructor: ${courses.size}개 강의")
-                    courses.take(2).forEach { course ->
-                        println("  - ${course.courseTitle}")
-                    }
-                }
 
             assertTrue(coursesByInstructor.isNotEmpty(), "최소 한 명 이상의 교수님이 있어야 합니다")
         }
