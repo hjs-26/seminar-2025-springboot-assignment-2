@@ -42,7 +42,10 @@ class PostController(
     @PostMapping("/api/v1/boards/{boardId}/posts")
     fun create(
         @Parameter(hidden = true) @LoggedInUser user: User,
-        @Parameter(description = "게시판 ID") @PathVariable boardId: Long,
+        @Parameter(
+            description = "게시판 ID",
+            example = "1",
+        ) @PathVariable boardId: Long,
         @RequestBody createRequest: CreatePostRequest,
     ): ResponseEntity<CreatePostResponse> {
         val postDto =
@@ -55,7 +58,19 @@ class PostController(
         return ResponseEntity.status(HttpStatus.CREATED).body(postDto)
     }
 
-    @Operation(summary = "게시글 목록 조회", description = "특정 게시판의 게시글 목록을 페이지네이션하여 조회합니다")
+    @Operation(
+        summary = "게시글 목록 조회",
+        description = """
+            특정 게시판의 게시글 목록을 페이지네이션하여 조회합니다.
+            
+            **커서 기반 페이지네이션 사용:**
+            - 첫 페이지: nextCreatedAt, nextId 파라미터 없이 요청
+            - 다음 페이지: 응답의 paging.nextCreatedAt, paging.nextId 값을 사용하여 요청
+            - hasNext가 false이면 마지막 페이지
+            
+            **정렬:** 생성일시 내림차순 (최신순) → 같은 시간이면 ID 내림차순
+        """,
+    )
     @ApiResponses(
         value = [
             ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공"),
@@ -64,10 +79,20 @@ class PostController(
     )
     @GetMapping("/api/v1/boards/{boardId}/posts")
     fun page(
-        @Parameter(description = "게시판 ID") @PathVariable boardId: Long,
-        @Parameter(description = "다음 페이지 커서 (생성 시간)") @RequestParam(value = "nextCreatedAt", required = false) nextCreatedAt: Long?,
-        @Parameter(description = "다음 페이지 커서 (ID)") @RequestParam(value = "nextId", required = false) nextId: Long?,
-        @Parameter(description = "페이지당 항목 수") @RequestParam(value = "limit", defaultValue = "20") limit: Int,
+        @Parameter(
+            description = "게시판 ID",
+            example = "1",
+        ) @PathVariable boardId: Long,
+        @Parameter(
+            description = "다음 페이지 커서 - 이전 응답의 마지막 게시글 생성 시간 (Unix timestamp, milliseconds)",
+        ) @RequestParam(value = "nextCreatedAt", required = false) nextCreatedAt: Long?,
+        @Parameter(
+            description = "다음 페이지 커서 - 이전 응답의 마지막 게시글 ID (nextCreatedAt와 함께 사용)",
+        ) @RequestParam(value = "nextId", required = false) nextId: Long?,
+        @Parameter(
+            description = "페이지당 게시글 수",
+            example = "20",
+        ) @RequestParam(value = "limit", defaultValue = "20") limit: Int,
     ): ResponseEntity<PostPagingResponse> {
         val postPagingResponse =
             postService.pageByBoardId(
@@ -88,7 +113,10 @@ class PostController(
     )
     @GetMapping("/api/v1/posts/{id}")
     fun get(
-        @Parameter(description = "게시글 ID") @PathVariable id: Long,
+        @Parameter(
+            description = "게시글 ID",
+            example = "123",
+        ) @PathVariable id: Long,
     ): ResponseEntity<PostDto> {
         val postDto = postService.get(id)
         return ResponseEntity.ok(postDto)
@@ -105,7 +133,10 @@ class PostController(
     )
     @PatchMapping("/api/v1/posts/{id}")
     fun update(
-        @Parameter(description = "게시글 ID") @PathVariable id: Long,
+        @Parameter(
+            description = "게시글 ID",
+            example = "123",
+        ) @PathVariable id: Long,
         @Parameter(hidden = true) @LoggedInUser user: User,
         @RequestBody updateRequest: UpdatePostRequest,
     ): ResponseEntity<UpdatePostResponse> {
@@ -129,7 +160,10 @@ class PostController(
     )
     @DeleteMapping("/api/v1/posts/{id}")
     fun delete(
-        @Parameter(description = "게시글 ID") @PathVariable id: Long,
+        @Parameter(
+            description = "게시글 ID",
+            example = "123",
+        ) @PathVariable id: Long,
         @Parameter(hidden = true) @LoggedInUser user: User,
     ): ResponseEntity<Unit> {
         postService.delete(id, user)

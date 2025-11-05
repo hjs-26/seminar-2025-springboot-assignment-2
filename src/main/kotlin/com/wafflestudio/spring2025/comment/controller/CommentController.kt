@@ -30,7 +30,14 @@ import org.springframework.web.bind.annotation.RestController
 class CommentController(
     private val commentService: CommentService,
 ) {
-    @Operation(summary = "댓글 목록 조회", description = "특정 게시글의 모든 댓글을 조회합니다 (최신순)")
+    @Operation(
+        summary = "댓글 목록 조회",
+        description = """
+            특정 게시글의 모든 댓글을 조회합니다.
+            
+            **정렬:** 생성일시 내림차순 (최신순)
+        """,
+    )
     @ApiResponses(
         value = [
             ApiResponse(responseCode = "200", description = "댓글 목록 조회 성공"),
@@ -39,7 +46,10 @@ class CommentController(
     )
     @GetMapping
     fun list(
-        @Parameter(description = "게시글 ID") @PathVariable postId: Long,
+        @Parameter(
+            description = "게시글 ID",
+            example = "123",
+        ) @PathVariable postId: Long,
     ): ResponseEntity<List<CommentDto>> {
         val comments = commentService.list(postId)
         return ResponseEntity.ok(comments)
@@ -55,7 +65,10 @@ class CommentController(
     )
     @PostMapping
     fun create(
-        @Parameter(description = "게시글 ID") @PathVariable postId: Long,
+        @Parameter(
+            description = "게시글 ID",
+            example = "123",
+        ) @PathVariable postId: Long,
         @RequestBody createRequest: CreateCommentRequest,
         @Parameter(hidden = true) @LoggedInUser user: User,
     ): ResponseEntity<CreateCommentResponse> {
@@ -79,8 +92,14 @@ class CommentController(
     )
     @PutMapping("/{id}")
     fun update(
-        @Parameter(description = "게시글 ID") @PathVariable postId: Long,
-        @Parameter(description = "댓글 ID") @PathVariable id: Long,
+        @Parameter(
+            description = "게시글 ID",
+            example = "123",
+        ) @PathVariable postId: Long,
+        @Parameter(
+            description = "댓글 ID",
+            example = "456",
+        ) @PathVariable id: Long,
         @Parameter(hidden = true) @LoggedInUser user: User,
         @RequestBody updateRequest: UpdateCommentRequest,
     ): ResponseEntity<UpdateCommentResponse> {
@@ -104,8 +123,14 @@ class CommentController(
     )
     @DeleteMapping("/{id}")
     fun delete(
-        @Parameter(description = "게시글 ID") @PathVariable postId: Long,
-        @Parameter(description = "댓글 ID") @PathVariable id: Long,
+        @Parameter(
+            description = "게시글 ID",
+            example = "123",
+        ) @PathVariable postId: Long,
+        @Parameter(
+            description = "댓글 ID",
+            example = "456",
+        ) @PathVariable id: Long,
         @Parameter(hidden = true) @LoggedInUser user: User,
     ): ResponseEntity<Unit> {
         commentService.delete(
