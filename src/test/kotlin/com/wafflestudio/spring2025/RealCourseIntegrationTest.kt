@@ -325,7 +325,7 @@ class RealCourseIntegrationTest
                     .andReturn()
 
             val response = mapper.readTree(result.response.contentAsString)
-            val courses = response.get("courses")
+            val courses = response.get("data")
 
             // 검색 결과가 있으면 "컴퓨터"가 포함되어 있는지 확인
             if (courses.size() > 0) {
