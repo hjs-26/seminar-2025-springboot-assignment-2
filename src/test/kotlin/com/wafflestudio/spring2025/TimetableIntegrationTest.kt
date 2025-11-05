@@ -7,7 +7,6 @@ import com.wafflestudio.spring2025.course.crawling.DayOfWeek
 import com.wafflestudio.spring2025.course.dto.CourseSearchResponse
 import com.wafflestudio.spring2025.helper.DataGenerator
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -694,8 +693,6 @@ class TimetableIntegrationTest
                 ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.data.length()").value(10))
                 .andExpect(jsonPath("$.hasNext").value(false))
-
-            // 중복 검증? 꼭 필요할까요?
         }
 
         @Test
@@ -757,11 +754,5 @@ class TimetableIntegrationTest
                         .header("Authorization", "Bearer $token")
                         .contentType(MediaType.APPLICATION_JSON),
                 ).andExpect(status().isNotFound)
-        }
-
-        @Test
-        @Disabled("곧 안내드리겠습니다")
-        fun `should fetch and save course information from SNU course registration site`() {
-            // 서울대 수강신청 사이트에서 강의 정보를 가져와 저장할 수 있다
         }
     }
