@@ -1,16 +1,15 @@
 package com.wafflestudio.spring2025.course.crawling.controller
 
 import com.wafflestudio.spring2025.common.enum.Semester
+import com.wafflestudio.spring2025.course.InvalidSemesterFormatException
 import com.wafflestudio.spring2025.course.crawling.service.CourseFetchService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
-import jakarta.validation.constraints.Pattern
 import kotlinx.coroutines.runBlocking
 import org.springframework.http.ResponseEntity
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/courses")
 @Tag(name = "Course Fetch", description = "강의 크롤링 API")
-@Validated
 class CourseFetchController(
     private val courseFetchService: CourseFetchService,
 ) {
@@ -47,19 +45,10 @@ class CourseFetchController(
     fun fetchCourses(
         @Parameter(description = "학기 (YYYY-1~4 형식)", example = "2025-1")
         @RequestParam(defaultValue = "2025-1")
-        @Pattern(regexp = "^\\d{4}-[1-4]$", message = "semester must be YYYY-1, YYYY-2, YYYY-3, or YYYY-4 format")
         semester: String,
     ): ResponseEntity<Map<String, Any>> =
         runBlocking {
-            val parsedSemester =
-                parseSemester(semester) ?: return@runBlocking ResponseEntity.badRequest().body(
-                    mapOf(
-                        "error" to "Invalid semester format",
-                        "message" to "semester must be YYYY-1, YYYY-2, YYYY-3, or YYYY-4 format",
-                    ),
-                )
-
-            val (year, semesterEnum) = parsedSemester
+            val (year, semesterEnum) = parseSemester(semester)
             val count = courseFetchService.fetchAndSaveCourses(year, semesterEnum)
             ResponseEntity.ok(
                 mapOf(
@@ -72,7 +61,12 @@ class CourseFetchController(
             )
         }
 
-    private fun parseSemester(semester: String): Pair<Int, Semester>? {
+    private fun parseSemester(semester: String): Pair<Int, Semester> {
+        // 형식 검증: YYYY-[1-4]
+        if (!semester.matches(Regex("^\\d{4}-[1-4]$"))) {
+            throw InvalidSemesterFormatException()
+        }
+
         return try {
             val (year, sem) = semester.split("-")
             val semesterEnum =
@@ -81,11 +75,11 @@ class CourseFetchController(
                     "2" -> Semester.SUMMER
                     "3" -> Semester.FALL
                     "4" -> Semester.WINTER
-                    else -> return null
+                    else -> throw InvalidSemesterFormatException()
                 }
             year.toInt() to semesterEnum
-        } catch (e: Exception) {
-            null
+        } catch (e: NumberFormatException) {
+            throw InvalidSemesterFormatException()
         }
     }
 }
