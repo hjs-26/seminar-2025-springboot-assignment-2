@@ -67,9 +67,7 @@ class RealCourseIntegrationTest
                             .header("Authorization", "Bearer $token")
                             .param("semester", semester),
                     ).andExpect(status().isOk)
-
             }
-
 
             // 크롤링된 데이터가 있는지 최종 확인
             val finalCourseCount = courseRepository.count()
@@ -77,6 +75,24 @@ class RealCourseIntegrationTest
 
             // 크롤링 완료 플래그 설정
             isCrawled = true
+        }
+
+        @Test
+        fun `should verify crawled course has required fields`() {
+            // 크롤링된 강의가 필수 필드를 가지고 있는지 확인
+            val courses = courseRepository.search(2025, Semester.SPRING, null, null, 10)
+            assumeTrue(courses.isNotEmpty(), "크롤링된 강의가 있어야 합니다")
+
+            courses.forEach { course ->
+                // 필수 필드 검증
+                assertNotNull(course.id, "Course ID는 null이 아니어야 합니다")
+                assertNotNull(course.courseNumber, "교과목번호는 null이 아니어야 합니다")
+                assertNotNull(course.lectureNumber, "강좌번호는 null이 아니어야 합니다")
+                assertNotNull(course.courseTitle, "교과목명은 null이 아니어야 합니다")
+                assertTrue(course.credit >= 0, "학점은 0 이상이어야 합니다")
+                assertEquals(2025, course.year, "연도가 2025여야 합니다")
+                assertEquals(Semester.SPRING, course.semester, "학기가 SPRING이어야 합니다")
+            }
         }
 
         @Test
@@ -207,92 +223,6 @@ class RealCourseIntegrationTest
         }
 
         @Test
-        fun `should search real courses by keyword`() {
-            // 실제 강의를 키워드로 검색할 수 있다
-            val (_, token) = dataGenerator.generateUser()
-
-            // "컴퓨터" 키워드로 검색
-            val result =
-                mvc
-                    .perform(
-                        get("/api/v1/courses")
-                            .header("Authorization", "Bearer $token")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(
-                                mapper.writeValueAsString(
-                                    mapOf(
-                                        "year" to 2025,
-                                        "semester" to "SPRING",
-                                        "keyword" to "컴퓨터",
-                                        "limit" to 10,
-                                    ),
-                                ),
-                            ),
-                    ).andExpect(status().isOk)
-                    .andReturn()
-
-            val response = mapper.readTree(result.response.contentAsString)
-            val courses = response.get("courses")
-
-            // 검색 결과가 있으면 "컴퓨터"가 포함되어 있는지 확인
-            if (courses.size() > 0) {
-                val firstCourse = courses.get(0)
-                val courseTitle = firstCourse.get("courseTitle").asText()
-                assertTrue(
-                    courseTitle.contains("컴퓨터") || courseTitle.contains("Computer"),
-                    "검색 결과에 '컴퓨터' 키워드가 포함되어야 합니다",
-                )
-            }
-        }
-
-        @Test
-        fun `should verify crawled course has required fields`() {
-            // 크롤링된 강의가 필수 필드를 가지고 있는지 확인
-            val courses = courseRepository.search(2025, Semester.SPRING, null, null, 10)
-            assumeTrue(courses.isNotEmpty(), "크롤링된 강의가 있어야 합니다")
-
-            courses.forEach { course ->
-                // 필수 필드 검증
-                assertNotNull(course.id, "Course ID는 null이 아니어야 합니다")
-                assertNotNull(course.courseNumber, "교과목번호는 null이 아니어야 합니다")
-                assertNotNull(course.lectureNumber, "강좌번호는 null이 아니어야 합니다")
-                assertNotNull(course.courseTitle, "교과목명은 null이 아니어야 합니다")
-                assertTrue(course.credit >= 0, "학점은 0 이상이어야 합니다")
-                assertEquals(2025, course.year, "연도가 2025여야 합니다")
-                assertEquals(Semester.SPRING, course.semester, "학기가 SPRING이어야 합니다")
-
-            }
-        }
-
-        @Test
-        fun `should find courses by specific department`() {
-            // 특정 학과의 강의를 찾을 수 있다
-            val allCourses = courseRepository.search(2025, Semester.SPRING, null, null, 100)
-            assumeTrue(allCourses.isNotEmpty(), "크롤링된 강의가 있어야 합니다")
-
-            // 학과별로 그룹화
-            val coursesByDepartment = allCourses.groupBy { it.department }
-
-            assertTrue(coursesByDepartment.isNotEmpty(), "최소 한 개 이상의 학과가 있어야 합니다")
-        }
-
-        @Test
-        fun `should find courses by instructor name`() {
-            // 교수님 이름으로 강의를 검색할 수 있다
-            val allCourses = courseRepository.search(2025, Semester.SPRING, null, null, 100)
-            assumeTrue(allCourses.isNotEmpty(), "크롤링된 강의가 있어야 합니다")
-
-            // 교수님이 지정된 강의 필터링
-            val coursesWithInstructor = allCourses.filter { !it.instructor.isNullOrBlank() }
-            assumeTrue(coursesWithInstructor.isNotEmpty(), "교수님이 지정된 강의가 있어야 합니다")
-
-            // 교수님별로 그룹화
-            val coursesByInstructor = coursesWithInstructor.groupBy { it.instructor }
-
-            assertTrue(coursesByInstructor.isNotEmpty(), "최소 한 명 이상의 교수님이 있어야 합니다")
-        }
-
-        @Test
         fun `should return error when adding course from different semester`() {
             // 다른 학기의 강의를 시간표에 추가하면 에러를 반환해야 한다
             val (user, token) = dataGenerator.generateUser()
@@ -350,5 +280,72 @@ class RealCourseIntegrationTest
                     post("/api/v1/timetables/${timetable.id}/courses/${course.id}")
                         .header("Authorization", "Bearer $token"),
                 ).andExpect(status().isConflict)
+        }
+
+        @Test
+        fun `should search real courses by keyword`() {
+            // 실제 강의를 키워드로 검색할 수 있다
+            val (_, token) = dataGenerator.generateUser()
+
+            // "컴퓨터" 키워드로 검색
+            val result =
+                mvc
+                    .perform(
+                        get("/api/v1/courses")
+                            .header("Authorization", "Bearer $token")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(
+                                mapper.writeValueAsString(
+                                    mapOf(
+                                        "year" to 2025,
+                                        "semester" to "SPRING",
+                                        "keyword" to "컴퓨터",
+                                        "limit" to 10,
+                                    ),
+                                ),
+                            ),
+                    ).andExpect(status().isOk)
+                    .andReturn()
+
+            val response = mapper.readTree(result.response.contentAsString)
+            val courses = response.get("courses")
+
+            // 검색 결과가 있으면 "컴퓨터"가 포함되어 있는지 확인
+            if (courses.size() > 0) {
+                val firstCourse = courses.get(0)
+                val courseTitle = firstCourse.get("courseTitle").asText()
+                assertTrue(
+                    courseTitle.contains("컴퓨터") || courseTitle.contains("Computer"),
+                    "검색 결과에 '컴퓨터' 키워드가 포함되어야 합니다",
+                )
+            }
+        }
+
+        @Test
+        fun `should find courses by specific department`() {
+            // 특정 학과의 강의를 찾을 수 있다
+            val allCourses = courseRepository.search(2025, Semester.SPRING, null, null, 100)
+            assumeTrue(allCourses.isNotEmpty(), "크롤링된 강의가 있어야 합니다")
+
+            // 학과별로 그룹화
+            val coursesByDepartment = allCourses.groupBy { it.department }
+
+            assertTrue(coursesByDepartment.isNotEmpty(), "최소 한 개 이상의 학과가 있어야 합니다")
+        }
+
+        @Test
+        fun `should find courses by instructor name`() {
+            // 교수님 이름으로 강의를 검색할 수 있다
+            val allCourses = courseRepository.search(2025, Semester.SPRING, null, null, 100)
+            assumeTrue(allCourses.isNotEmpty(), "크롤링된 강의가 있어야 합니다")
+
+            // 교수님이 지정된 강의 필터링
+            val coursesWithInstructor = allCourses.filter { !it.instructor.isNullOrBlank() }
+            assumeTrue(coursesWithInstructor.isNotEmpty(), "교수님이 지정된 강의가 있어야 합니다")
+
+            // 교수님별로 그룹화
+            val coursesByInstructor = coursesWithInstructor.groupBy { it.instructor }
+
+            assertTrue(coursesByInstructor.isNotEmpty(), "최소 한 명 이상의 교수님이 있어야 합니다")
         }
     }
