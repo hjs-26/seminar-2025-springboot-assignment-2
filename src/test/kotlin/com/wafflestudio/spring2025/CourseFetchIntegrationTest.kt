@@ -96,16 +96,6 @@ class CourseFetchIntegrationTest
             }
         }
 
-        @Test
-        fun `should accept valid semester formats`() {
-            // 올바른 semester 형식은 통과해야 한다 (실제 크롤링은 하지 않음)
-            val validFormats = listOf("2025-1", "2025-2", "2025-3", "2025-4", "2024-1")
-
-            validFormats.forEach { validSemester ->
-                // 생략
-            }
-        }
-
         // @Disabled("실제 서울대 사이트를 호출하므로 수동으로 실행")
         @Test
         fun `should parse excel data correctly and save to database`() {
